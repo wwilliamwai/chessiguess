@@ -4,7 +4,7 @@ import processing.core.PApplet;
 
 public class Pawn extends Piece {
     private boolean hasMoved;
-    private int[] lastPosition;
+    private int[] previousPosition;
     public Pawn(int x, int y, boolean w, PApplet window) {
         super(x, y, w);
         name = "pawn";
@@ -161,7 +161,7 @@ public class Pawn extends Piece {
         // make it so you run this method whenenver a pawn makes it to the last square in the column. doesn't matter if its white or black. if its a pawn and it
         // makes it to the last square it will promote.
     }
-    public int[] getLastPosition() {
-        return lastPosition;
+    public int[] getPreviousPosition() {
+        return previousPosition;
     }
 }

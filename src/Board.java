@@ -1,14 +1,17 @@
 import processing.core.PApplet;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Board {
+    private boolean whitePlayer;
     private ArrayList<Piece> whitePieces;
     private ArrayList<Piece> blackPieces;
     private Piece whiteKing;
     private Piece blackKing;
     private boolean whiteTurn;
+    private boolean movesNotSet;
     private boolean tileClicked;
     private int[] clickedTileLoc;
     private Piece selected;
@@ -17,10 +20,22 @@ public class Board {
         whiteTurn = true;
         whitePieces = new ArrayList<>();
         blackPieces = new ArrayList<>();
+        movesNotSet = true;
         clickedTileLoc = new int[2];
         createStartPieces(window);
         selected = null;
         lastMoved = new Piece(10000, 10000, true);
+        pickSide();
+    }
+    public void pickSide() {
+        String[] options = { "Play White?", "Play Black?" };
+        var selection = JOptionPane.showOptionDialog(null, "Pick your side", "Select one:", 0, 3, null, options, options[0]);
+        if (selection == 0) {
+            whitePlayer = true;
+        }
+        if (selection == 1) {
+            whitePlayer = false;
+        }
     }
     public void drawPieces(PApplet window) {
         for (Piece piece: blackPieces) {
@@ -89,7 +104,6 @@ public class Board {
         if (isBoardInCheck()) {
 
             kingInPlay.setHasBeenInCheck(true);
-
             if (isPiecesMoveEmpty(piecesInPlay, enemyPieces)) {
                 if (whiteTurn) {
                     window.fill(0,0,255);
@@ -106,12 +120,39 @@ public class Board {
         } else if (isPiecesMoveEmpty(piecesInPlay, enemyPieces)) {
             System.out.println("what the heck stalemate!");
         }
-
+        if (movesNotSet) {
+            setAllInPlayMoves(piecesInPlay, enemyPieces, this);
+            movesNotSet = false;
+        }
+        if (whiteTurn == whitePlayer) {
+            playerMoves(piecesInPlay, enemyPieces, window);
+        } else aiMoves(piecesInPlay, enemyPieces, window);
+    }
+    public void aiMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Game window) {
+        ArrayList<int[]> allMovePossibilities = new ArrayList<>();
+        ArrayList<int[]> allInitialPositions = new ArrayList<>();
+        for (Piece piece: piecesInPlay) {
+            for (int[] futureMove: piece.getFutureMoves()) {
+                allMovePossibilities.add(futureMove);
+                allInitialPositions.add(piece.getPosition());
+            }
+        }
+        int randomMoveIndex = (int) (Math.random() * allMovePossibilities.size());
+        for (Piece piece: piecesInPlay) {
+            if (selected == null && Arrays.equals(piece.getPosition(), allInitialPositions.get(randomMoveIndex))) {
+                selected = piece;
+            }
+        }
+        selected.move(allMovePossibilities.get(randomMoveIndex), piecesInPlay, enemyPieces, window);
+        whiteTurn = !whiteTurn;
+        selected = null;
+        movesNotSet = true;
+        clearAllFutureMoves();
+    }
+    public void playerMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Game window) {
         isTileClicked(window, piecesInPlay);
         if (tileClicked) {
             drawClickedTile(window);
-            selected.setFutureMoves(piecesInPlay, enemyPieces);
-            selected.filterMovesInCheck(piecesInPlay, enemyPieces, this, lastMoved);
             ArrayList<int[]> selectedFutureMoves = selected.getFutureMoves();
             drawMoveOptions(window, selectedFutureMoves);
 
@@ -119,6 +160,7 @@ public class Board {
                 whiteTurn = !whiteTurn;
                 tileClicked = false;
                 selected = null;
+                movesNotSet = true;
                 clearAllFutureMoves();
             }
         }
@@ -142,7 +184,6 @@ public class Board {
                     yClickLoc < futureMove[1] + 100) {
                 selected.move(futureMove, piecesInPlay, enemyPieces, window);
                 lastMoved = selected;
-                System.out.println(lastMoved.name);
                 return true;
             }
         }
@@ -202,10 +243,10 @@ public class Board {
         }
         return true;
     }
+    public void setAllInPlayMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Board gameBoard) {
+        for (Piece piece: piecesInPlay) {
+            piece.setFutureMoves(piecesInPlay, enemyPieces);
+            piece.filterMovesInCheck(piecesInPlay, enemyPieces, gameBoard, lastMoved);
+        }
+    }
 }
-
-
-
-
-
-

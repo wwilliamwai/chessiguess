@@ -173,7 +173,7 @@ public class Piece {
     public void setHasBeenInCheck(boolean trueOrFalse) {
     }
     // technically only works for a few pieces but is just here for using the child version if it ever asks.
-    public int[] getLastPosition() {
+    public int[] getPreviousPosition() {
         return new int[2];
     }
 }

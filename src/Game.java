@@ -1,6 +1,5 @@
 import processing.core.PApplet;
 
-import java.util.ArrayList;
 
 public class Game extends PApplet {
     // TODO: declare game variables

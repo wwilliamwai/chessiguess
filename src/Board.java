@@ -29,7 +29,7 @@ public class Board {
     }
     public void pickSide() {
         String[] options = { "Play White?", "Play Black?" };
-        var selection = JOptionPane.showOptionDialog(null, "Pick your side", "Select one:", 0, 3, null, options, options[0]);
+        int selection = JOptionPane.showOptionDialog(null, "Pick your side", "Select one:", 0, 3, null, options, options[0]);
         if (selection == 0) {
             whitePlayer = true;
         }
@@ -118,7 +118,10 @@ public class Board {
                 }
             }
         } else if (isPiecesMoveEmpty(piecesInPlay, enemyPieces)) {
-            System.out.println("what the heck stalemate!");
+            window.fill(0,0,255);
+            window.textSize(50);
+            window.text("Stalemate", 60, 400);
+            return;
         }
         if (movesNotSet) {
             setAllInPlayMoves(piecesInPlay, enemyPieces, this);

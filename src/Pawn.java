@@ -19,7 +19,7 @@ public class Pawn extends Piece {
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
-        lastPosition = getPosition();
+        previousPosition = getPosition();
         // meaning there's literally an enemy piece on the square we're advancing to
         if (isMoveAnAttack(nextPos, enemyPieces)) {
             attack(nextPos, enemyPieces);
@@ -123,8 +123,8 @@ public class Pawn extends Piece {
     public boolean isEnPassantConditionsCorrect(Piece lastMoved) {
         // asks if the lastMoved piece is  pawn, if their last moved position is 200 y units away from their current one
         // if their y pos is the same as the current pawn rn, and if the x pos is 100 untis to the side of the ucrrent pawn
-        return lastMoved.name.equals("pawn") && (lastMoved.getLastPosition()[1] == lastMoved.getyPos() - 200
-                || lastMoved.getLastPosition()[1] == lastMoved.getyPos() + 200) && lastMoved.getyPos() == yPos &&
+        return lastMoved.name.equals("pawn") && (lastMoved.getPreviousPosition()[1] == lastMoved.getyPos() - 200
+                || lastMoved.getPreviousPosition()[1] == lastMoved.getyPos() + 200) && lastMoved.getyPos() == yPos &&
                 (lastMoved.getxPos() == xPos + 100 || lastMoved.getxPos() == xPos - 100);
     }
     public boolean isEnPassantInCheck(int[] enPassantPos, Piece lastMoved, ArrayList<Piece> enemyPieces, Board gameBoard) {
@@ -144,7 +144,7 @@ public class Pawn extends Piece {
     public void promote(ArrayList<Piece> piecesInPlay, PApplet window) {
         piecesInPlay.remove(this);
         String[] options = { "Queen", "Rook", "Bishop", "Knight" };
-        var selection = JOptionPane.showOptionDialog(null, "Select what to promote to", "Select one:", 0, 3, null, options, options[0]);
+        int selection = JOptionPane.showOptionDialog(null, "Select what to promote to", "Select one:", 0, 3, null, options, options[0]);
         if (selection == 0) {
             piecesInPlay.add(new Queen(xPos, yPos, white, window));
         }

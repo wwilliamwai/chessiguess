@@ -107,7 +107,6 @@ public class King extends Piece {
     }
     public void createLongCastleMove(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Board gameBoard) {
         Piece rook = findLongCastleRook(piecesInPlay);
-        rook.printName();
         if (isRookGoodConditions(rook) && !isAnyPieceThreeLeft(piecesInPlay, enemyPieces) && !isLongCastleInCheck(enemyPieces, rook, gameBoard)) {
             System.out.println("long castling is allowed chat");
             int[] longCastleMove = new int[2];

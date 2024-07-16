@@ -4,16 +4,16 @@ import java.util.ArrayList;
 
 public class Rook extends Piece{
     private boolean hasMoved;
-    public Rook(int x, int y, boolean w, PApplet window) {
-        super(x, y, w);
+    public Rook(int x, int y, boolean w, boolean whitePlayer, PApplet window) {
+        super(x, y, w, whitePlayer);
         name = "rook";
         hasMoved = false;
         setAndLoadImage(window);
     }
     public void setAndLoadImage(PApplet window) {
-        if (white) {
-            imageLink = "images/Chess_rlt45.svg.png";
-        } else imageLink = "images/Chess_rdt45.svg.png";
+        if (isPieceWhite) {
+            imageLink = "chesspieces/whiteRook.png";
+        } else imageLink = "chesspieces/blackRook.png";
         actualImage = window.loadImage(imageLink, "png");
         actualImage.resize(100,100);
     }

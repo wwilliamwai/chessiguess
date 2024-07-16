@@ -4,33 +4,39 @@ import processing.core.PApplet;
 
 public class Pawn extends Piece {
     private boolean hasMoved;
-    private int[] previousPosition;
-    public Pawn(int x, int y, boolean w, PApplet window) {
-        super(x, y, w);
+    private int verticalUnits;
+    public Pawn(int x, int y, boolean w, boolean whitePlayer, PApplet window) {
+        super(x, y, w, whitePlayer);
         name = "pawn";
         hasMoved = false;
+        setVerticalUnits();
         setAndLoadImage(window);
     }
+    public void setVerticalUnits() {
+        if (isPieceWhite == isWhitePlayer) {
+            verticalUnits = -100;
+        } else verticalUnits = 100;
+    }
     public void setAndLoadImage(PApplet window) {
-        if (white) {
-            imageLink = "images/Chess_plt45.svg.png";
-        } else imageLink = "images/Chess_pdt45.svg.png";
+        if (isPieceWhite) {
+            imageLink = "chesspieces/whitePawn.png";
+        } else imageLink = "chesspieces/blackPawn.png";
         actualImage = window.loadImage(imageLink,"png");
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
+        System.out.println("piece is moving");
         previousPosition = getPosition();
         // meaning there's literally an enemy piece on the square we're advancing to
         if (isMoveAnAttack(nextPos, enemyPieces)) {
+            System.out.println("there is a piece moving which we kill");
             attack(nextPos, enemyPieces);
         } else if (nextPos[0] != xPos) {
             // otherwise it's just an enpassant scenario if you're moving diagonally and thhere's no piece there
             int[] enPassantKilled = new int[2];
             enPassantKilled[0] = nextPos[0];
-            if (white) {
-                enPassantKilled[1] = nextPos[1] + 100;
-            } else enPassantKilled[1] = nextPos[1] - 100;
-
+            enPassantKilled[1] = nextPos[1] - verticalUnits;
+            System.out.println("there is a piece moving which we kill");
             attack(enPassantKilled, enemyPieces);
         }
         xPos = nextPos[0];
@@ -56,11 +62,7 @@ public class Pawn extends Piece {
         if (isMovesAlreadySet) {
             return;
         }
-        // sets up the direction of the next moves based on what color they are
-        int verticalUnits = -100;
-        if (!white) {
-            verticalUnits = 100;
-        }
+
         int[] oneForward = createVerticalMove(verticalUnits);
         // if the move is doable then it gets added to the list
         if (isMoveOpen(oneForward, piecesInPlay) && isMoveOpen(oneForward, enemyPieces)) {
@@ -107,9 +109,7 @@ public class Pawn extends Piece {
             int[] enPassantPos = new int[2];
 
             enPassantPos[0] = lastMoved.xPos;
-            if (white) {
-                enPassantPos[1] = lastMoved.yPos - 100;
-            } else enPassantPos[1] = lastMoved.yPos + 100;
+            enPassantPos[1] = lastMoved.yPos + verticalUnits;
 
             if (!isEnPassantInCheck(enPassantPos, lastMoved, enemyPieces, gameBoard)) {
                 futureMoves.add(enPassantPos);
@@ -146,22 +146,19 @@ public class Pawn extends Piece {
         String[] options = { "Queen", "Rook", "Bishop", "Knight" };
         int selection = JOptionPane.showOptionDialog(null, "Select what to promote to", "Select one:", 0, 3, null, options, options[0]);
         if (selection == 0) {
-            piecesInPlay.add(new Queen(xPos, yPos, white, window));
+            piecesInPlay.add(new Queen(xPos, yPos, isPieceWhite, isWhitePlayer,window));
         }
         if (selection == 1) {
-            piecesInPlay.add(new Rook(xPos, yPos, white, window));
+            piecesInPlay.add(new Rook(xPos, yPos, isPieceWhite, isWhitePlayer,window));
         }
         if (selection == 2) {
-            piecesInPlay.add(new Bishop(xPos, yPos, white, window));
+            piecesInPlay.add(new Bishop(xPos, yPos, isPieceWhite, isWhitePlayer,window));
         }
         if (selection == 3) {
-            piecesInPlay.add(new Knight(xPos, yPos, white, window));
+            piecesInPlay.add(new Knight(xPos, yPos, isPieceWhite, isWhitePlayer,window));
         }
         // spawn in a new piece kill off the original pawn, and that's allyou need to do. nothing more. nothing less. and im sure it will wori. and then just
         // make it so you run this method whenenver a pawn makes it to the last square in the column. doesn't matter if its white or black. if its a pawn and it
         // makes it to the last square it will promote.
-    }
-    public int[] getPreviousPosition() {
-        return previousPosition;
     }
 }

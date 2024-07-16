@@ -3,15 +3,15 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 
 public class Knight extends Piece{
-    public Knight(int x, int y, boolean w, PApplet window) {
-        super(x,y,w);
+    public Knight(int x, int y, boolean w, boolean whitePlayer, PApplet window) {
+        super(x,y,w, whitePlayer);
         name = "knight";
         setAndLoadImage(window);
     }
     public void setAndLoadImage(PApplet window) {
-        if (white) {
-            imageLink = "images/Chess_nlt45.svg.png";
-        } else imageLink = "images/Chess_ndt45.svg.png";
+        if (isPieceWhite) {
+            imageLink = "chesspieces/whiteKnight.png";
+        } else imageLink = "chesspieces/blackKnight.png";
         actualImage = window.loadImage(imageLink, "png");
         actualImage.resize(100,100);
     }

@@ -25,6 +25,7 @@ public class Game extends PApplet {
         background(255);    // paint screen white
         fill(0,255,0);          // load green paint color
         drawBoard();
+        gameBoard.drawLastMovedTile(this);
         gameBoard.drawPieces(this);
         drawLetters();
         drawNumbers();

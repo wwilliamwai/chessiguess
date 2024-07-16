@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Board {
-    private boolean whitePlayer;
+    private boolean isWhitePlayer;
     private ArrayList<Piece> whitePieces;
     private ArrayList<Piece> blackPieces;
     private Piece whiteKing;
@@ -22,19 +22,19 @@ public class Board {
         blackPieces = new ArrayList<>();
         movesNotSet = true;
         clickedTileLoc = new int[2];
+        pickSide();
         createStartPieces(window);
         selected = null;
-        lastMoved = new Piece(10000, 10000, true);
-        pickSide();
+        lastMoved = new Piece(10000, 10000, true, true);
     }
     public void pickSide() {
         String[] options = { "Play White?", "Play Black?" };
         int selection = JOptionPane.showOptionDialog(null, "Pick your side", "Select one:", 0, 3, null, options, options[0]);
         if (selection == 0) {
-            whitePlayer = true;
+            isWhitePlayer = true;
         }
         if (selection == 1) {
-            whitePlayer = false;
+            isWhitePlayer = false;
         }
     }
     public void drawPieces(PApplet window) {
@@ -44,6 +44,16 @@ public class Board {
         for (Piece piece: whitePieces) {
             piece.draw(window);
         }
+    }
+    public void drawLastMovedTile(PApplet window) {
+        if (lastMoved.name.equals("piece")) {
+            return;
+        }
+        int[] currentPos = lastMoved.getPosition();
+        int[] previousPos = lastMoved.getPreviousPosition();
+        window.fill(255,0,0,80);
+        window.rect(currentPos[0], currentPos[1], 100, 100);
+        window.rect(previousPos[0], previousPos[1], 100, 100);
     }
     public void drawClickedTile(PApplet window) {
         window.fill(0, 0, 0, 60);
@@ -60,31 +70,43 @@ public class Board {
         createUniquePiecesRows(window);
     }
     private void createPawnRows(PApplet window) {
+        int whiteYPos = 600;
+        int blackYPos = 100;
+        if (!isWhitePlayer) {
+            whiteYPos = 100;
+            blackYPos = 600;
+        }
         for (int i = 0; i < 8; i++) {
-            whitePieces.add(new Pawn(i * 100,600, true, window));
-            blackPieces.add(new Pawn(i * 100, 100, false, window));
+            whitePieces.add(new Pawn(i * 100, whiteYPos, true, isWhitePlayer, window));
+            blackPieces.add(new Pawn(i * 100, blackYPos, false, isWhitePlayer, window));
         }
     }
     private void createUniquePiecesRows(PApplet window) {
-        whitePieces.add(new Rook(0,700, true, window));
-        whitePieces.add(new Rook(700,700, true, window));
-        whitePieces.add(new Knight(100, 700, true, window));
-        whitePieces.add(new Knight(600, 700, true, window));
-        whitePieces.add(new Bishop(200, 700, true, window));
-        whitePieces.add(new Bishop(500, 700, true, window));
-        whitePieces.add(new Queen(300, 700, true, window));
-        whiteKing = new King(400, 700, true, window);
+        int whiteYPos = 700;
+        int blackYPos = 0;
+        if (!isWhitePlayer) {
+            whiteYPos = 0;
+            blackYPos = 700;
+        }
+        whitePieces.add(new Rook(0,whiteYPos, true, isWhitePlayer, window));
+        whitePieces.add(new Rook(700,whiteYPos, true, isWhitePlayer, window));
+        whitePieces.add(new Knight(100, whiteYPos, true, isWhitePlayer, window));
+        whitePieces.add(new Knight(600, whiteYPos, true, isWhitePlayer, window));
+        whitePieces.add(new Bishop(200, whiteYPos, true, isWhitePlayer, window));
+        whitePieces.add(new Bishop(500, whiteYPos, true, isWhitePlayer, window));
+        whitePieces.add(new Queen(300, whiteYPos, true, isWhitePlayer, window));
+        whiteKing = new King(400, whiteYPos, true, isWhitePlayer, window);
         whitePieces.add(whiteKing);
 
 
-        blackPieces.add(new Rook(0,0, false, window));
-        blackPieces.add(new Rook(700,0, false, window));
-        blackPieces.add(new Knight(100, 0, false, window));
-        blackPieces.add(new Knight(600, 0, false, window));
-        blackPieces.add(new Bishop(200, 0, false, window));
-        blackPieces.add(new Bishop(500, 0, false, window));
-        blackPieces.add(new Queen(300, 0, false, window));
-        blackKing = new King(400, 0, false, window);
+        blackPieces.add(new Rook(0,blackYPos, false, isWhitePlayer, window));
+        blackPieces.add(new Rook(700,blackYPos, false, isWhitePlayer, window));
+        blackPieces.add(new Knight(100, blackYPos, false, isWhitePlayer, window));
+        blackPieces.add(new Knight(600, blackYPos, false, isWhitePlayer, window));
+        blackPieces.add(new Bishop(200, blackYPos, false, isWhitePlayer, window));
+        blackPieces.add(new Bishop(500, blackYPos, false, isWhitePlayer, window));
+        blackPieces.add(new Queen(300, blackYPos, false, isWhitePlayer, window));
+        blackKing = new King(400, blackYPos, false, isWhitePlayer, window);
         blackPieces.add(blackKing);
     }
     public void updateBoard(Game window) {
@@ -120,33 +142,37 @@ public class Board {
         } else if (isPiecesMoveEmpty(piecesInPlay, enemyPieces)) {
             window.fill(0,0,255);
             window.textSize(50);
-            window.text("Stalemate", 60, 400);
+            window.text("Stalemate", 300, 400);
             return;
         }
         if (movesNotSet) {
             setAllInPlayMoves(piecesInPlay, enemyPieces, this);
             movesNotSet = false;
         }
-        if (whiteTurn == whitePlayer) {
+        if (whiteTurn == isWhitePlayer) {
             playerMoves(piecesInPlay, enemyPieces, window);
         } else aiMoves(piecesInPlay, enemyPieces, window);
     }
     public void aiMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Game window) {
         ArrayList<int[]> allMovePossibilities = new ArrayList<>();
         ArrayList<int[]> allInitialPositions = new ArrayList<>();
+        // basically adds each individual futuremove into the total list of possibilities, and adds their initial positon to correspond wtih the index
         for (Piece piece: piecesInPlay) {
             for (int[] futureMove: piece.getFutureMoves()) {
                 allMovePossibilities.add(futureMove);
                 allInitialPositions.add(piece.getPosition());
             }
         }
+        // int rounds it down so it gives just a random index
         int randomMoveIndex = (int) (Math.random() * allMovePossibilities.size());
+        // looks for the piece that has the corresponding initial position
         for (Piece piece: piecesInPlay) {
             if (selected == null && Arrays.equals(piece.getPosition(), allInitialPositions.get(randomMoveIndex))) {
                 selected = piece;
             }
         }
         selected.move(allMovePossibilities.get(randomMoveIndex), piecesInPlay, enemyPieces, window);
+        lastMoved = selected;
         whiteTurn = !whiteTurn;
         selected = null;
         movesNotSet = true;

@@ -9,17 +9,21 @@ public class Piece {
     protected String name;
     protected boolean isMovesAlreadySet;
     protected ArrayList<int[]> futureMoves;
+    protected int[] previousPosition;
     protected int xPos;
     protected int yPos;
-    protected boolean white;
+    protected boolean isWhitePlayer;
+    protected boolean isPieceWhite;
     protected String imageLink;
     protected PImage actualImage;
 
-    public Piece(int x, int y, boolean w) {
+    public Piece(int x, int y, boolean w, boolean whitePlayer) {
         name = "piece";
         xPos = x;
         yPos = y;
-        white = w;
+        isPieceWhite = w;
+        isWhitePlayer = whitePlayer;
+        previousPosition = getPosition();
         futureMoves = new ArrayList<>();
         isMovesAlreadySet = false;
         imageLink = new String("");
@@ -31,7 +35,10 @@ public class Piece {
     }
 
     public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
+        System.out.println("piece is moving");
+        previousPosition = getPosition();
         if (isMoveAnAttack(nextPos, enemyPieces)) {
+            System.out.println("there is a piece on our next move which we kill");
             attack(nextPos, piecesInPlay);
         }
         xPos = nextPos[0];
@@ -41,11 +48,11 @@ public class Piece {
     }
 
     public void attack(int[] nextPos, ArrayList<Piece> enemyPieces) {
-        Iterator<Piece> iterator = enemyPieces.iterator();
-        while (iterator.hasNext()) {
-            Piece enemy = iterator.next();
-            if (enemy.getxPos() == nextPos[0] && enemy.getyPos() == nextPos[1]) {
-                iterator.remove();
+        for (int i = 0; i < enemyPieces.size(); i++) {
+            if (enemyPieces.get(i).getxPos() == nextPos[0] && enemyPieces.get(i).getyPos() == nextPos[1]) {
+                System.out.println("killing " + enemyPieces.get(i).name);
+                enemyPieces.remove(i);
+                return;
             }
         }
     }
@@ -174,6 +181,6 @@ public class Piece {
     }
     // technically only works for a few pieces but is just here for using the child version if it ever asks.
     public int[] getPreviousPosition() {
-        return new int[2];
+        return previousPosition;
     }
 }

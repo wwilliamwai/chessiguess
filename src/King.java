@@ -7,23 +7,25 @@ public class King extends Piece {
     private boolean hasBeenInCheck;
     private Piece shortCastleRook;
     private Piece longCastleRook;
-    public King(int x, int y, boolean w, PApplet window) {
-        super(x, y, w);
+    public King(int x, int y, boolean w, boolean whitePlayer, PApplet window) {
+        super(x, y, w, whitePlayer);
         name = "king";
         hasMoved = false;
         hasBeenInCheck = false;
         setAndLoadImage(window);
     }
     public void setAndLoadImage(PApplet window) {
-        if (white) {
-            imageLink = "images/Chess_klt45.svg.png";
-        } else imageLink = "images/Chess_kdt45.svg.png";
+        if (isPieceWhite) {
+            imageLink = "chesspieces/whiteKing.png";
+        } else imageLink = "chesspieces/blackKing.png";
         actualImage = window.loadImage(imageLink,"png");
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
+        System.out.println("piece is moving");
         if (isMoveAnAttack(nextPos, enemyPieces)) {
             attack(nextPos, enemyPieces);
+            System.out.println("there is a piece on our next move which we kill");
         }
         if (nextPos[0] == xPos + 200) {
             xPos = nextPos[0];

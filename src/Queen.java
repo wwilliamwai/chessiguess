@@ -5,22 +5,24 @@ import java.util.ArrayList;
 public class Queen extends Piece {
     private Bishop invisBishop;
     private Rook invisRook;
-    public Queen(int x, int y, boolean w, PApplet window) {
-        super(x,y,w);
+    public Queen(int x, int y, boolean w, boolean whitePlayer, PApplet window) {
+        super(x,y,w, whitePlayer);
         name = "queen";
-        invisBishop = new Bishop(x, y, w, window);
-        invisRook = new Rook(x, y, w, window);
+        invisBishop = new Bishop(x, y, w, whitePlayer, window);
+        invisRook = new Rook(x, y, w, whitePlayer, window);
         setAndLoadImage(window);
     }
     public void setAndLoadImage(PApplet window) {
-        if (white) {
-            imageLink = "images/Chess_qlt45.svg.png";
-        } else imageLink = "images/Chess_qdt45.svg.png";
+        if (isPieceWhite) {
+            imageLink = "chesspieces/whiteQueen.png";
+        } else imageLink = "chesspieces/blackQueen.png";
         actualImage = window.loadImage(imageLink, "png");
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
+        System.out.println("piece is moving");
         if (isMoveAnAttack(nextPos, enemyPieces)) {
+            System.out.println("there is a piece on our next move which we kill");
             attack(nextPos,enemyPieces);
         }
         xPos = nextPos[0];

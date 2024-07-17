@@ -5,17 +5,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Board {
-    private boolean isWhitePlayer;
-    private ArrayList<Piece> whitePieces;
-    private ArrayList<Piece> blackPieces;
+    private final ArrayList<Piece> whitePieces;
+    private final ArrayList<Piece> blackPieces;
     private Piece whiteKing;
     private Piece blackKing;
+    private boolean isWhitePlayer;
     private boolean whiteTurn;
     private boolean movesNotSet;
     private boolean tileClicked;
-    private int[] clickedTileLoc;
+    private final int[] clickedTileLoc;
     private Piece selected;
     private Piece lastMoved;
+    private final MovesAlgorithm movesAlgorithm;
     public Board(PApplet window) {
         whiteTurn = true;
         whitePieces = new ArrayList<>();
@@ -26,6 +27,8 @@ public class Board {
         createStartPieces(window);
         selected = null;
         lastMoved = new Piece(10000, 10000, true, true);
+        // placeholders for team and enemy since it will be updated anyways
+        movesAlgorithm = new MovesAlgorithm(whiteTurn, whitePieces, blackPieces);
     }
     public void pickSide() {
         String[] options = { "Play White?", "Play Black?" };
@@ -154,24 +157,21 @@ public class Board {
         } else aiMoves(piecesInPlay, enemyPieces, window);
     }
     public void aiMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Game window) {
+        movesAlgorithm.updatePieces(piecesInPlay, enemyPieces);
+        movesAlgorithm.updateWhoseTurn(whiteTurn);
         ArrayList<int[]> allMovePossibilities = new ArrayList<>();
-        ArrayList<int[]> allInitialPositions = new ArrayList<>();
+        ArrayList<Piece> allInitialPieces = new ArrayList<>();
         // basically adds each individual futuremove into the total list of possibilities, and adds their initial positon to correspond wtih the index
         for (Piece piece: piecesInPlay) {
             for (int[] futureMove: piece.getFutureMoves()) {
                 allMovePossibilities.add(futureMove);
-                allInitialPositions.add(piece.getPosition());
+                allInitialPieces.add(piece);
             }
         }
-        // int rounds it down so it gives just a random index
-        int randomMoveIndex = (int) (Math.random() * allMovePossibilities.size());
-        // looks for the piece that has the corresponding initial position
-        for (Piece piece: piecesInPlay) {
-            if (selected == null && Arrays.equals(piece.getPosition(), allInitialPositions.get(randomMoveIndex))) {
-                selected = piece;
-            }
-        }
-        selected.move(allMovePossibilities.get(randomMoveIndex), piecesInPlay, enemyPieces, window);
+        movesAlgorithm.pickBestMove(allMovePossibilities, allInitialPieces);
+
+        selected = movesAlgorithm.getChosenPiece();
+        selected.move(movesAlgorithm.getChosenMove(), piecesInPlay, enemyPieces, window);
         lastMoved = selected;
         whiteTurn = !whiteTurn;
         selected = null;

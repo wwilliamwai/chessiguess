@@ -39,7 +39,7 @@ public class Piece {
         previousPosition = getPosition();
         if (isMoveAnAttack(nextPos, enemyPieces)) {
             System.out.println("there is a piece on our next move which we kill");
-            attack(nextPos, piecesInPlay);
+            attack(nextPos, enemyPieces);
         }
         xPos = nextPos[0];
         yPos = nextPos[1];

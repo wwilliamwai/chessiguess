@@ -40,6 +40,8 @@ public class King extends Piece {
             xPos = nextPos[0];
             yPos = nextPos[1];
         }
+        shortCastleRook = null;
+        longCastleRook = null;
         clearFutureMoves();
         isMovesAlreadySet = false;
         hasMoved = true;
@@ -59,7 +61,7 @@ public class King extends Piece {
     }
     public void createAndCheckMove(int horizontalUnits, int verticalUnits, ArrayList<Piece> piecesInPlay,
                                    ArrayList<Piece> enemyPieces) {
-        int move[] = new int[2];
+        int[] move = new int[2];
         move[0] = xPos + horizontalUnits;
         move[1] = yPos + verticalUnits;
         hasMoveConflict(move, piecesInPlay, enemyPieces);
@@ -100,6 +102,7 @@ public class King extends Piece {
         Piece rook = findShortCastleRook(piecesInPlay);
         if (isRookGoodConditions(rook) && !isAnyPieceTwoRight(enemyPieces, piecesInPlay) && !isShortCastleInCheck(enemyPieces, rook, gameBoard)) {
             System.out.println("short castling is allowed chat");
+            shortCastleRook = rook;
             int[] shortCastleMove = new int[2];
             shortCastleMove[0] = getxPos() + 200;
             shortCastleMove[1] = getyPos();
@@ -111,6 +114,7 @@ public class King extends Piece {
         Piece rook = findLongCastleRook(piecesInPlay);
         if (isRookGoodConditions(rook) && !isAnyPieceThreeLeft(piecesInPlay, enemyPieces) && !isLongCastleInCheck(enemyPieces, rook, gameBoard)) {
             System.out.println("long castling is allowed chat");
+            longCastleRook = rook;
             int[] longCastleMove = new int[2];
             longCastleMove[0] = getxPos() - 200;
             longCastleMove[1] = getyPos();
@@ -120,7 +124,6 @@ public class King extends Piece {
     public Piece findShortCastleRook(ArrayList<Piece> piecesInPlay) {
         for (Piece teamPiece: piecesInPlay) {
             if (teamPiece.getxPos() == xPos + 300 && teamPiece.getyPos() == yPos && teamPiece.name.equals("rook")) {
-                shortCastleRook = teamPiece;
                 return teamPiece;
             }
         }
@@ -129,7 +132,6 @@ public class King extends Piece {
     public Piece findLongCastleRook(ArrayList<Piece> piecesInPlay) {
         for (Piece teamPiece: piecesInPlay) {
             if (teamPiece.getxPos() == xPos - 400 && teamPiece.getyPos() == yPos && teamPiece.name.equals("rook")) {
-                longCastleRook = teamPiece;
                 return teamPiece;
             }
         }

@@ -27,8 +27,7 @@ public class Board {
         createStartPieces(window);
         selected = null;
         lastMoved = new Piece(10000, 10000, true, true);
-        // placeholders for team and enemy since it will be updated anyways
-        movesAlgorithm = new MovesAlgorithm(whiteTurn, whitePieces, blackPieces);
+        movesAlgorithm = new MovesAlgorithm(isWhitePlayer, getAITeam(), getAIEnemy());
     }
     public void pickSide() {
         String[] options = { "Play White?", "Play Black?" };
@@ -157,18 +156,11 @@ public class Board {
         } else aiMoves(piecesInPlay, enemyPieces, window);
     }
     public void aiMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Game window) {
-        movesAlgorithm.updatePieces(piecesInPlay, enemyPieces);
-        movesAlgorithm.updateWhoseTurn(whiteTurn);
         ArrayList<int[]> allMovePossibilities = new ArrayList<>();
         ArrayList<Piece> allInitialPieces = new ArrayList<>();
         // basically adds each individual futuremove into the total list of possibilities, and adds their initial positon to correspond wtih the index
-        for (Piece piece: piecesInPlay) {
-            for (int[] futureMove: piece.getFutureMoves()) {
-                allMovePossibilities.add(futureMove);
-                allInitialPieces.add(piece);
-            }
-        }
-        movesAlgorithm.pickBestMove(allMovePossibilities, allInitialPieces);
+        addAllMovePossibilities(allMovePossibilities, allInitialPieces, piecesInPlay);
+        movesAlgorithm.chooseAIMove(allMovePossibilities, allInitialPieces, window.gameBoard, 1, true);
 
         selected = movesAlgorithm.getChosenPiece();
         selected.move(movesAlgorithm.getChosenMove(), piecesInPlay, enemyPieces, window);
@@ -177,6 +169,14 @@ public class Board {
         selected = null;
         movesNotSet = true;
         clearAllFutureMoves();
+    }
+    public void addAllMovePossibilities(ArrayList<int[]> allMovePossibilities, ArrayList<Piece> allInitialPieces, ArrayList<Piece> piecesInPlay) {
+        for (Piece piece: piecesInPlay) {
+            for (int[] futureMove: piece.getFutureMoves()) {
+                allMovePossibilities.add(futureMove);
+                allInitialPieces.add(piece);
+            }
+        }
     }
     public void playerMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Game window) {
         isTileClicked(window, piecesInPlay);
@@ -277,5 +277,21 @@ public class Board {
             piece.setFutureMoves(piecesInPlay, enemyPieces);
             piece.filterMovesInCheck(piecesInPlay, enemyPieces, gameBoard, lastMoved);
         }
+    }
+    public ArrayList<Piece> getAITeam() {
+        if (isWhitePlayer) {
+            return blackPieces;
+        } else return whitePieces;
+    }
+    public ArrayList<Piece> getAIEnemy() {
+        if (isWhitePlayer) {
+            return whitePieces;
+        } else return blackPieces;
+    }
+    public void switchTurns() {
+        whiteTurn = !whiteTurn;
+    }
+    public Piece getLastMoved() {
+        return lastMoved;
     }
 }

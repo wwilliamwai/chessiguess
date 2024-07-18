@@ -156,13 +156,11 @@ public class Piece {
     // use of aliveTeamPieces looks useless but its used in the king version of the move.
     public void filterMovesInCheck(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Board gameBoard, Piece lastMoved) {
         int[] initialPos = getPosition();
-        for (int i = 0; i < futureMoves.size(); i++) {
+        for (int i = futureMoves.size()-1; i >= 0; i--) {
             Piece killedPiece = testMove(futureMoves.get(i), enemyPieces);
             if (gameBoard.isBoardInCheck()) {
                 futureMoves.remove(i);
-                i--;
             }
-            // reverts the piece back to its original position after teh test
             if (killedPiece != null) {
                 enemyPieces.add(killedPiece);
             }

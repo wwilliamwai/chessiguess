@@ -3,11 +3,13 @@ import javax.swing.*;
 import processing.core.PApplet;
 
 public class Pawn extends Piece {
+    private Piece promoted;
     private boolean hasMoved;
     private int verticalUnits;
     public Pawn(int x, int y, boolean w, boolean whitePlayer, PApplet window) {
         super(x, y, w, whitePlayer);
         name = "pawn";
+        promoted = null;
         hasMoved = false;
         setVerticalUnits();
         setAndLoadImage(window);
@@ -41,8 +43,12 @@ public class Pawn extends Piece {
         }
         xPos = nextPos[0];
         yPos = nextPos[1];
+        preTestPosition = getPosition();
         if (nextPos[1] == 0 || nextPos[1] == 700) {
-            promote(piecesInPlay, window);
+            // if the piece is the ai
+            if (isPieceWhite != isWhitePlayer) {
+                aiPromote(piecesInPlay, window);
+            } else promote(piecesInPlay, window);
         }
         clearFutureMoves();
         hasMoved = true;
@@ -50,12 +56,23 @@ public class Pawn extends Piece {
     }
     public Piece testMove(int[] nextPos, ArrayList<Piece> enemyPieces) {
         Piece killed = null;
-        if (nextPos[0] != xPos) {
+        if (isMoveAnAttack(nextPos, enemyPieces)) {
             killed = testAttack(nextPos, enemyPieces);
+        } else if (nextPos[0] != xPos) {
+            int[] enPassantKilled = new int[2];
+            enPassantKilled[0] = nextPos[0];
+            enPassantKilled[1] = nextPos[1] - verticalUnits;
+            killed = testAttack(enPassantKilled, enemyPieces);
         }
         xPos = nextPos[0];
         yPos = nextPos[1];
         return killed;
+    }
+    public void revertTest(Piece killed, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
+        super.revertTest(killed, piecesInPlay, enemyPieces);
+        if (promoted != null) {
+            piecesInPlay.remove(promoted);
+        }
     }
     public void setFutureMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
         // so the piece doesn't keep adding moves to its arrayList when the board updates
@@ -160,5 +177,10 @@ public class Pawn extends Piece {
         // spawn in a new piece kill off the original pawn, and that's allyou need to do. nothing more. nothing less. and im sure it will wori. and then just
         // make it so you run this method whenenver a pawn makes it to the last square in the column. doesn't matter if its white or black. if its a pawn and it
         // makes it to the last square it will promote.
+    }
+    public void aiPromote(ArrayList<Piece> piecesInPlay, PApplet window) {
+        piecesInPlay.remove(this);
+        // it just auto promotes to a queen but don't think the ai takes promotions into account when they make a move...
+        piecesInPlay.add(new Queen(xPos, yPos, isPieceWhite, isWhitePlayer, window));
     }
 }

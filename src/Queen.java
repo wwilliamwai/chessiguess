@@ -20,16 +20,28 @@ public class Queen extends Piece {
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
-        System.out.println("piece is moving");
         if (isMoveAnAttack(nextPos, enemyPieces)) {
-            System.out.println("there is a piece on our next move which we kill");
             attack(nextPos,enemyPieces);
         }
         xPos = nextPos[0];
         yPos = nextPos[1];
-        updateInvisBishop();
-        updateInvisRook();
+        preTestPosition = getPosition();
+        updateInvisPieces();
         isMovesAlreadySet = false;
+    }
+    public Piece testMove(int[] nextPos, ArrayList<Piece> enemyPieces) {
+        Piece killed = null;
+        if (isMoveAnAttack(nextPos, enemyPieces)) {
+            killed = testAttack(nextPos, enemyPieces);
+        }
+        xPos = nextPos[0];
+        yPos = nextPos[1];
+        testUpdateInvisPieces();
+        return killed;
+    }
+    public void revertTest(Piece killed, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
+        super.revertTest(killed, piecesInPlay, enemyPieces);
+        testUpdateInvisPieces();
     }
     public void setFutureMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
         if (isMovesAlreadySet) {
@@ -63,13 +75,17 @@ public class Queen extends Piece {
     public void sendRookMoves() {
         futureMoves.addAll(invisRook.getFutureMoves());
     }
-    public void updateInvisBishop() {
+    public void testUpdateInvisPieces() {
+        invisBishop.xPos = xPos;
+        invisBishop.yPos = yPos;
+        invisRook.xPos = xPos;
+        invisRook.yPos = yPos;
+    }
+    public void updateInvisPieces() {
         invisBishop.xPos = xPos;
         invisBishop.yPos = yPos;
         invisBishop.clearFutureMoves();
         invisBishop.unsetMovesAlreadySet();
-    }
-    public void updateInvisRook() {
         invisRook.xPos = xPos;
         invisRook.yPos = yPos;
         invisRook.clearFutureMoves();

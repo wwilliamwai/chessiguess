@@ -291,6 +291,11 @@ public class Board {
     public void switchTurns() {
         whiteTurn = !whiteTurn;
     }
+    public void printWhoseTurn() {
+        if (whiteTurn) {
+            System.out.println("it is currently white's turn");
+        } else System.out.println("it is currently black's turn");
+    }
     public Piece getLastMoved() {
         return lastMoved;
     }

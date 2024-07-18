@@ -9,6 +9,7 @@ public class Piece {
     protected String name;
     protected boolean isMovesAlreadySet;
     protected ArrayList<int[]> futureMoves;
+    protected int[] preTestPosition;
     protected int[] previousPosition;
     protected int xPos;
     protected int yPos;
@@ -23,6 +24,7 @@ public class Piece {
         yPos = y;
         isPieceWhite = w;
         isWhitePlayer = whitePlayer;
+        preTestPosition = getPosition();
         previousPosition = getPosition();
         futureMoves = new ArrayList<>();
         isMovesAlreadySet = false;
@@ -43,6 +45,7 @@ public class Piece {
         }
         xPos = nextPos[0];
         yPos = nextPos[1];
+        preTestPosition = getPosition();
         clearFutureMoves();
         isMovesAlreadySet = false;
     }
@@ -77,7 +80,13 @@ public class Piece {
         // otherwise if u don't kill anyone it just returns null;
         return null;
     }
-
+    public void revertTest(Piece killed, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
+        xPos = preTestPosition[0];
+        yPos = preTestPosition[1];
+        if (killed != null) {
+            enemyPieces.add(killed);
+        }
+    }
     public int getxPos() {
         return xPos;
     }
@@ -155,16 +164,12 @@ public class Piece {
     }
     // use of aliveTeamPieces looks useless but its used in the king version of the move.
     public void filterMovesInCheck(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Board gameBoard, Piece lastMoved) {
-        int[] initialPos = getPosition();
         for (int i = futureMoves.size()-1; i >= 0; i--) {
-            Piece killedPiece = testMove(futureMoves.get(i), enemyPieces);
+            Piece killed = testMove(futureMoves.get(i), enemyPieces);
             if (gameBoard.isBoardInCheck()) {
                 futureMoves.remove(i);
             }
-            if (killedPiece != null) {
-                enemyPieces.add(killedPiece);
-            }
-            testMove(initialPos, enemyPieces);
+            revertTest(killed, piecesInPlay, enemyPieces);
         }
     }
     public void printName() {

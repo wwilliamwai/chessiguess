@@ -22,10 +22,8 @@ public class King extends Piece {
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
-        System.out.println("piece is moving");
         if (isMoveAnAttack(nextPos, enemyPieces)) {
             attack(nextPos, enemyPieces);
-            System.out.println("there is a piece on our next move which we kill");
         }
         if (nextPos[0] == xPos + 200) {
             xPos = nextPos[0];
@@ -40,11 +38,46 @@ public class King extends Piece {
             xPos = nextPos[0];
             yPos = nextPos[1];
         }
+        preTestPosition = getPosition();
         shortCastleRook = null;
         longCastleRook = null;
         clearFutureMoves();
         isMovesAlreadySet = false;
         hasMoved = true;
+    }
+    public Piece testMove(int[] nextPos, ArrayList<Piece> enemyPieces) {
+        Piece killed = null;
+        if (isMoveAnAttack(nextPos, enemyPieces)) {
+            killed = testAttack(nextPos, enemyPieces);
+        }
+        if (nextPos[0] == xPos + 200) {
+            xPos = nextPos[0];
+            yPos = nextPos[1];
+            nextPos[0] = nextPos[0] - 100;
+            if (shortCastleRook != null) {
+                shortCastleRook.testMove(nextPos, enemyPieces);
+            }
+        }
+        if (nextPos[0] == xPos - 200) {
+            xPos = nextPos[0] - 100;
+            yPos = nextPos[1];
+            if (longCastleRook != null) {
+                longCastleRook.testMove(nextPos, enemyPieces);
+            }
+        } else {
+            xPos = nextPos[0];
+            yPos = nextPos[1];
+        }
+        return killed;
+    }
+    public void revertTest(Piece killed, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
+        super.revertTest(killed, piecesInPlay, enemyPieces);
+        if (shortCastleRook != null) {
+            shortCastleRook.revertTest(killed, piecesInPlay, enemyPieces);
+        }
+        if (longCastleRook != null) {
+            longCastleRook.revertTest(killed, piecesInPlay, enemyPieces);
+        }
     }
     public void setFutureMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
         if (isMovesAlreadySet) {
@@ -100,8 +133,7 @@ public class King extends Piece {
         // we already have (has not been moved) (has not been in check) (doesn't pass through a check on the left)
         // make sure the king position after the castle is not in check. Make sure the rook hasn't moved yet either. make sure there aren't any pieces in between
         Piece rook = findShortCastleRook(piecesInPlay);
-        if (isRookGoodConditions(rook) && !isAnyPieceTwoRight(enemyPieces, piecesInPlay) && !isShortCastleInCheck(enemyPieces, rook, gameBoard)) {
-            System.out.println("short castling is allowed chat");
+        if (isRookGoodConditions(rook) && !isAnyPieceTwoRight(enemyPieces, piecesInPlay) && !isShortCastleInCheck(piecesInPlay, enemyPieces, rook, gameBoard)) {
             shortCastleRook = rook;
             int[] shortCastleMove = new int[2];
             shortCastleMove[0] = getxPos() + 200;
@@ -112,8 +144,7 @@ public class King extends Piece {
     }
     public void createLongCastleMove(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Board gameBoard) {
         Piece rook = findLongCastleRook(piecesInPlay);
-        if (isRookGoodConditions(rook) && !isAnyPieceThreeLeft(piecesInPlay, enemyPieces) && !isLongCastleInCheck(enemyPieces, rook, gameBoard)) {
-            System.out.println("long castling is allowed chat");
+        if (isRookGoodConditions(rook) && !isAnyPieceThreeLeft(piecesInPlay, enemyPieces) && !isLongCastleInCheck(piecesInPlay, enemyPieces, rook, gameBoard)) {
             longCastleRook = rook;
             int[] longCastleMove = new int[2];
             longCastleMove[0] = getxPos() - 200;
@@ -168,10 +199,8 @@ public class King extends Piece {
         }
         return false;
     }
-    public boolean isShortCastleInCheck(ArrayList<Piece> enemyPieces, Piece rook, Board gameBoard) {
+    public boolean isShortCastleInCheck(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Piece rook, Board gameBoard) {
         boolean wasInCheck;
-        int[] kingInitialPos = getPosition();
-        int[] rookInitialPos = rook.getPosition();
         int[] futureKingPos = new int[2];
         int[] futureRookPos = new int[2];
         futureKingPos[0] = xPos + 200;
@@ -184,15 +213,13 @@ public class King extends Piece {
 
         wasInCheck = gameBoard.isBoardInCheck();
         // revert back the test moves
-        testMove(kingInitialPos, enemyPieces);
-        rook.testMove(rookInitialPos, enemyPieces);
+        revertTest(null, piecesInPlay, enemyPieces);
+        rook.revertTest(null, piecesInPlay, enemyPieces);
 
         return wasInCheck;
     }
-    public boolean isLongCastleInCheck(ArrayList<Piece> enemyPieces, Piece rook, Board gameBoard) {
+    public boolean isLongCastleInCheck(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Piece rook, Board gameBoard) {
         boolean wasInCheck;
-        int[] kingInitialPos = getPosition();
-        int[] rookInitialPos = rook.getPosition();
         int[] futureKingPos = new int[2];
         int[] futureRookPos = new int[2];
         futureKingPos[0] = xPos - 300;
@@ -200,7 +227,7 @@ public class King extends Piece {
         futureRookPos[0] = xPos + 200;
         futureRookPos[1] = yPos;
 
-        if (isTwoLeftInCheck(kingInitialPos, enemyPieces, gameBoard)) {
+        if (isTwoLeftInCheck(piecesInPlay, enemyPieces, gameBoard)) {
             return true;
         }
 
@@ -209,12 +236,12 @@ public class King extends Piece {
 
         wasInCheck = gameBoard.isBoardInCheck();
         // revert back the test moves
-        testMove(kingInitialPos, enemyPieces);
-        rook.testMove(rookInitialPos, enemyPieces);
+        revertTest(null, piecesInPlay, enemyPieces);
+        rook.revertTest(null, piecesInPlay, enemyPieces);
 
         return wasInCheck;
     }
-    public boolean isTwoLeftInCheck(int[] kingInitialPos, ArrayList<Piece> enemyPieces, Board gameBoard) {
+    public boolean isTwoLeftInCheck(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Board gameBoard) {
         boolean wasInCheck;
         int[] twoLeft = new int[2];
         twoLeft[0] = xPos - 200;
@@ -222,7 +249,7 @@ public class King extends Piece {
         testMove(twoLeft, enemyPieces);
         wasInCheck = gameBoard.isBoardInCheck();
         // revert back the test moves
-        testMove(kingInitialPos, enemyPieces);
+        revertTest(null, piecesInPlay, enemyPieces);
 
         return wasInCheck;
 

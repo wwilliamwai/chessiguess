@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 
 public class MovesAlgorithm {
+    private ArrayList<Integer> allPointsValue;
     private final int MAX_DEPTH;
     private final boolean isPlayerWhite;
     private final ArrayList<Piece> aiPieces;
@@ -9,92 +10,102 @@ public class MovesAlgorithm {
     private Piece chosenPiece;
 
     public MovesAlgorithm(boolean yesWhite, ArrayList<Piece> team, ArrayList<Piece> enemy) {
-        MAX_DEPTH = 2;
+        allPointsValue = new ArrayList<>();
+        MAX_DEPTH = 3;
         isPlayerWhite = yesWhite;
         aiPieces = team;
         playerPieces = enemy;
     }
-    public int chooseAIMove(ArrayList<int[]> allFutureMoves, ArrayList<Piece> allInitialPieces, Board gameBoard, int depth, boolean aiTurn) {
-        ArrayList<Piece> piecesInPlay;
-        ArrayList<Piece> enemyPieces;
-        if (aiTurn) {
-            piecesInPlay = aiPieces;
-            enemyPieces = playerPieces;
-        } else {
-            piecesInPlay = playerPieces;
-            enemyPieces = aiPieces;
-        }
-        ArrayList<Integer> allPointsValue = new ArrayList<>();
-
+    public int minimax(Board gameBoard, int depth, int alpha, int beta, boolean aiTurn) {
+        // if we hit the bottom of our search then it returns a static value of the max points(if ai) or min points(if player)
         if (depth == MAX_DEPTH) {
+            return calculatePoints();
+        }
+        ArrayList<int[]> allFutureMoves = new ArrayList<>();
+        ArrayList<Piece> allInitialPieces = new ArrayList<>();
+        if (aiTurn) {
+            gameBoard.setAllInPlayMoves(aiPieces, playerPieces, gameBoard);
+            gameBoard.addAllMovePossibilities(allFutureMoves, allInitialPieces, aiPieces);
+        } else {
+            gameBoard.setAllInPlayMoves(playerPieces, aiPieces, gameBoard);
+            gameBoard.addAllMovePossibilities(allFutureMoves, allInitialPieces, playerPieces);
+        }
+        if (aiTurn) {
+            int maxEval = Integer.MIN_VALUE;
             for (int i = 0; i < allFutureMoves.size(); i++) {
-                Piece killed = allInitialPieces.get(i).testMove(allFutureMoves.get(i), enemyPieces);
-                allPointsValue.add(calculatePoints());
-                allInitialPieces.get(i).revertTest(killed, piecesInPlay, enemyPieces);
+                // testing out the move option, and then saving the point evaluation to allPointsValue
+                Piece killed = allInitialPieces.get(i).testMove(allFutureMoves.get(i), playerPieces);
+                gameBoard.switchTurns();
+                int eval = minimax(gameBoard, depth +1, alpha, beta, !aiTurn);
+                if (depth == 0) {
+                    allPointsValue.add(eval);
+                }
+                // undo the testMove that just happened
+                allInitialPieces.get(i).revertTest(killed, aiPieces, playerPieces);
+                gameBoard.switchTurns();
+
+                // allPointsValue.get(i) is the point evaluation of the move AT THIS loop
+                maxEval = Math.max(maxEval, eval);
+                alpha = Math.max(alpha, eval);
+                if (beta <= alpha) {
+                    break;
+                }
             }
-            if (aiTurn) {
-                return getHighestPointVal(allPointsValue);
-            } else return getLowestPointVal(allPointsValue);
+            if (depth == 0) {
+                int index = getHighestPointsIndex();
+                chosenMove = allFutureMoves.get(index);
+                chosenPiece = allInitialPieces.get(index);
+                return 0;
+            } else return maxEval;
+        } else {
+            int minEval = Integer.MAX_VALUE;
+            for (int i = 0; i < allFutureMoves.size(); i++) {
+                // testing out the move option, and then saving the point evaluation to allPointsValue
+                Piece killed = allInitialPieces.get(i).testMove(allFutureMoves.get(i), aiPieces);
+                gameBoard.switchTurns();
+                int eval = minimax(gameBoard, depth + 1, alpha, beta, !aiTurn);
+                if (depth == 0) {
+                    allPointsValue.add(eval);
+                }
+                // undo the move that just happened
+                allInitialPieces.get(i).revertTest(killed, aiPieces, aiPieces);
+                gameBoard.switchTurns();
+
+                // allPointsValue.get(i) is the point evaluation of the move AT THIS loop
+                minEval = Math.min(minEval, eval);
+                beta = Math.min(beta, eval);
+                if (beta <= alpha) {
+                    break;
+                }
+            }
+            if (depth == 0) {
+                int index = getHighestPointsIndex();
+                chosenMove = allFutureMoves.get(index);
+                chosenPiece = allInitialPieces.get(index);
+                return 0;
+            }
+            return minEval;
         }
-        for (int i = 0; i < allFutureMoves.size(); i++) {
-            Piece killed = allInitialPieces.get(i).testMove(allFutureMoves.get(i), enemyPieces);
-            ArrayList<int[]> nextAllFutureMoves = new ArrayList<>();
-            ArrayList<Piece> nextAllInitialPieces = new ArrayList<>();
-            setUpNextTurn(enemyPieces, piecesInPlay, gameBoard, nextAllFutureMoves, nextAllInitialPieces);
-            allPointsValue.add(chooseAIMove(nextAllFutureMoves, nextAllInitialPieces, gameBoard, depth +1, !aiTurn));
-            allInitialPieces.get(i).revertTest(killed, piecesInPlay, enemyPieces);
-            gameBoard.switchTurns();
-        }
-        if (depth == 1) {
-            int index = getHighestPointIndex(allPointsValue);
-            chosenMove = allFutureMoves.get(index);
-            chosenPiece = allInitialPieces.get(index);
-            return 0;
-        }
-        else if (aiTurn) {
-            return getHighestPointVal(allPointsValue);
-        } else return getLowestPointVal(allPointsValue);
 
     }
-    public void setUpNextTurn(ArrayList<Piece> enemyPieces, ArrayList<Piece> piecesInPlay, Board gameBoard, ArrayList<int[]> nextAllFutureMoves,
-                               ArrayList<Piece> nextAllInitialPieces) {
-        gameBoard.switchTurns();
-        gameBoard.setAllInPlayMoves(enemyPieces, piecesInPlay, gameBoard);
-
-        gameBoard.addAllMovePossibilities(nextAllFutureMoves, nextAllInitialPieces, enemyPieces);
-    }
-    public int getLowestPointVal(ArrayList<Integer> allPointsValue) {
-        int lowestVal = Integer.MAX_VALUE;
-        for (Integer integer : allPointsValue) {
-            if (integer < lowestVal) {
-                lowestVal = integer;
-            }
-        }
-        return lowestVal;
-    }
-    public int getHighestPointVal(ArrayList<Integer> allPointsValue) {
-        int highestVal = Integer.MIN_VALUE;
-        for (Integer integer: allPointsValue) {
-            if (integer > highestVal) {
-                highestVal = integer;
-            }
-        }
-        return highestVal;
-    }
-    public int getHighestPointIndex(ArrayList<Integer> lowestPointsPostMove) {
+    public int getHighestPointsIndex() {
         ArrayList<Integer> bestIndexes = new ArrayList<>();
         int highestPoints = Integer.MIN_VALUE;
-        for (int i = 0; i < lowestPointsPostMove.size(); i++) {
-            if (lowestPointsPostMove.get(i) > highestPoints) {
-                highestPoints = lowestPointsPostMove.get(i);
+        for (int i = 0; i < allPointsValue.size(); i++) {
+            System.out.println("this index " + i + " had " + allPointsValue.get(i) + " points");
+            if (allPointsValue.get(i) > highestPoints) {
+                highestPoints = allPointsValue.get(i);
                 bestIndexes.clear();
                 bestIndexes.add(i);
-            } else if (lowestPointsPostMove.get(i) == highestPoints) {
+            } else if (allPointsValue.get(i) == highestPoints) {
                 bestIndexes.add(i);
             }
         }
         // on the 2nd depth if multiple moves gives the same minimum loss, then they should all have equal chance.
         int random = (int) (Math.random() * bestIndexes.size() );
+
+        allPointsValue.clear();
+        System.out.println("we seriously chose index " + bestIndexes.get(random));
         return bestIndexes.get(random);
     }
     public int calculatePoints() {

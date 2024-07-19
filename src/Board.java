@@ -147,27 +147,18 @@ public class Board {
             window.text("Stalemate", 300, 400);
             return;
         }
-        if (movesNotSet) {
-            setAllInPlayMoves(piecesInPlay, enemyPieces, this);
-            movesNotSet = false;
-        }
         if (whiteTurn == isWhitePlayer) {
             playerMoves(piecesInPlay, enemyPieces, window);
         } else aiMoves(piecesInPlay, enemyPieces, window);
     }
     public void aiMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Game window) {
-        ArrayList<int[]> allMovePossibilities = new ArrayList<>();
-        ArrayList<Piece> allInitialPieces = new ArrayList<>();
-        // basically adds each individual futuremove into the total list of possibilities, and adds their initial positon to correspond wtih the index
-        addAllMovePossibilities(allMovePossibilities, allInitialPieces, piecesInPlay);
-        movesAlgorithm.chooseAIMove(allMovePossibilities, allInitialPieces, window.gameBoard, 1, true);
+        movesAlgorithm.minimax(this, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
 
         selected = movesAlgorithm.getChosenPiece();
         selected.move(movesAlgorithm.getChosenMove(), piecesInPlay, enemyPieces, window);
         lastMoved = selected;
         whiteTurn = !whiteTurn;
         selected = null;
-        movesNotSet = true;
         clearAllFutureMoves();
     }
     public void addAllMovePossibilities(ArrayList<int[]> allMovePossibilities, ArrayList<Piece> allInitialPieces, ArrayList<Piece> piecesInPlay) {
@@ -179,6 +170,10 @@ public class Board {
         }
     }
     public void playerMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, Game window) {
+        if (movesNotSet) {
+            setAllInPlayMoves(piecesInPlay, enemyPieces, this);
+            movesNotSet = false;
+        }
         isTileClicked(window, piecesInPlay);
         if (tileClicked) {
             drawClickedTile(window);

@@ -3,8 +3,8 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 
 public class Knight extends Piece{
-    public Knight(int x, int y, boolean w, boolean whitePlayer, PApplet window) {
-        super(x,y,w, whitePlayer);
+    public Knight(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window) {
+        super(x,y,isWhite, whitePlayer);
         name = "knight";
         setAndLoadImage(window);
     }

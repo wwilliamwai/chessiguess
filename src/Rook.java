@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class Rook extends Piece{
     private boolean hasMoved;
-    public Rook(int x, int y, boolean w, boolean whitePlayer, PApplet window) {
-        super(x, y, w, whitePlayer);
+    public Rook(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window) {
+        super(x, y, isWhite, whitePlayer);
         name = "rook";
         hasMoved = false;
         setAndLoadImage(window);

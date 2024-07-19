@@ -6,8 +6,8 @@ public class Pawn extends Piece {
     private Piece promoted;
     private boolean hasMoved;
     private int verticalUnits;
-    public Pawn(int x, int y, boolean w, boolean whitePlayer, PApplet window) {
-        super(x, y, w, whitePlayer);
+    public Pawn(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window) {
+        super(x, y, isWhite, whitePlayer);
         name = "pawn";
         promoted = null;
         hasMoved = false;
@@ -27,22 +27,20 @@ public class Pawn extends Piece {
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
-        System.out.println("piece is moving");
         previousPosition = getPosition();
         // meaning there's literally an enemy piece on the square we're advancing to
         if (isMoveAnAttack(nextPos, enemyPieces)) {
-            System.out.println("there is a piece moving which we kill");
             attack(nextPos, enemyPieces);
         } else if (nextPos[0] != xPos) {
             // otherwise it's just an enpassant scenario if you're moving diagonally and thhere's no piece there
             int[] enPassantKilled = new int[2];
             enPassantKilled[0] = nextPos[0];
             enPassantKilled[1] = nextPos[1] - verticalUnits;
-            System.out.println("there is a piece moving which we kill");
             attack(enPassantKilled, enemyPieces);
         }
         xPos = nextPos[0];
         yPos = nextPos[1];
+        printPastAndFuturePosition();
         preTestPosition = getPosition();
         if (nextPos[1] == 0 || nextPos[1] == 700) {
             // if the piece is the ai
@@ -66,12 +64,18 @@ public class Pawn extends Piece {
         }
         xPos = nextPos[0];
         yPos = nextPos[1];
+        hasMoved = true;
         return killed;
     }
     public void revertTest(Piece killed, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
         super.revertTest(killed, piecesInPlay, enemyPieces);
         if (promoted != null) {
             piecesInPlay.remove(promoted);
+        }
+        if (isPieceWhite == isWhitePlayer && preTestPosition[1] == 600) {
+            hasMoved = false;
+        } else if (isPieceWhite != isWhitePlayer && preTestPosition[1] == 100) {
+            hasMoved = false;
         }
     }
     public void setFutureMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
@@ -140,7 +144,7 @@ public class Pawn extends Piece {
     public boolean isEnPassantConditionsCorrect(Piece lastMoved) {
         // asks if the lastMoved piece is  pawn, if their last moved position is 200 y units away from their current one
         // if their y pos is the same as the current pawn rn, and if the x pos is 100 untis to the side of the ucrrent pawn
-        return lastMoved.name.equals("pawn") && (lastMoved.getPreviousPosition()[1] == lastMoved.getyPos() - 200
+        return lastMoved.name.equals("pawn") && lastMoved.isPieceWhite != this.isPieceWhite && (lastMoved.getPreviousPosition()[1] == lastMoved.getyPos() - 200
                 || lastMoved.getPreviousPosition()[1] == lastMoved.getyPos() + 200) && lastMoved.getyPos() == yPos &&
                 (lastMoved.getxPos() == xPos + 100 || lastMoved.getxPos() == xPos - 100);
     }

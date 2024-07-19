@@ -3,7 +3,6 @@ import processing.core.PImage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 
 public class Piece {
     protected String name;
@@ -18,17 +17,17 @@ public class Piece {
     protected String imageLink;
     protected PImage actualImage;
 
-    public Piece(int x, int y, boolean w, boolean whitePlayer) {
+    public Piece(int x, int y, boolean isWhite, boolean whitePlayer) {
         name = "piece";
         xPos = x;
         yPos = y;
-        isPieceWhite = w;
+        isPieceWhite = isWhite;
         isWhitePlayer = whitePlayer;
         preTestPosition = getPosition();
         previousPosition = getPosition();
         futureMoves = new ArrayList<>();
         isMovesAlreadySet = false;
-        imageLink = new String("");
+        imageLink = "";
         actualImage = new PImage();
     }
     public void setAndLoadImage(PApplet window) {}
@@ -37,14 +36,13 @@ public class Piece {
     }
 
     public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
-        System.out.println("piece is moving");
         previousPosition = getPosition();
         if (isMoveAnAttack(nextPos, enemyPieces)) {
-            System.out.println("there is a piece on our next move which we kill");
             attack(nextPos, enemyPieces);
         }
         xPos = nextPos[0];
         yPos = nextPos[1];
+        printPastAndFuturePosition();
         preTestPosition = getPosition();
         clearFutureMoves();
         isMovesAlreadySet = false;
@@ -52,8 +50,8 @@ public class Piece {
 
     public void attack(int[] nextPos, ArrayList<Piece> enemyPieces) {
         for (int i = 0; i < enemyPieces.size(); i++) {
-            if (enemyPieces.get(i).getxPos() == nextPos[0] && enemyPieces.get(i).getyPos() == nextPos[1]) {
-                System.out.println("killing " + enemyPieces.get(i).name);
+            if (Arrays.equals(enemyPieces.get(i).getPosition(), nextPos)) {
+                System.out.println("Piece " + whatColor() + " " + name + " killed a " + enemyPieces.get(i).whatColor() + " " + enemyPieces.get(i).name);
                 enemyPieces.remove(i);
                 return;
             }
@@ -69,16 +67,15 @@ public class Piece {
         return killed;
     }
     public Piece testAttack(int[] nextPos, ArrayList<Piece> enemyPieces) {
-        Iterator<Piece> iterator = enemyPieces.iterator();
-        while (iterator.hasNext()) {
-            Piece enemy = iterator.next();
-            if (enemy.getxPos() == nextPos[0] && enemy.getyPos() == nextPos[1]) {
-                iterator.remove();
-                return enemy;
+        Piece killed = null;
+        for (int i = 0; i < enemyPieces.size(); i++) {
+            if (Arrays.equals(enemyPieces.get(i).getPosition(), nextPos)) {
+                killed = enemyPieces.get(i);
+                enemyPieces.remove(i);
+                return killed;
             }
         }
-        // otherwise if u don't kill anyone it just returns null;
-        return null;
+        return killed;
     }
     public void revertTest(Piece killed, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
         xPos = preTestPosition[0];
@@ -106,11 +103,6 @@ public class Piece {
         return futureMoves;
     }
 
-    public void printFutureMoves() {
-        for (int[] futureMove : futureMoves) {
-            System.out.println(Arrays.toString(futureMove));
-        }
-    }
 
     public void setFutureMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
     }
@@ -172,9 +164,6 @@ public class Piece {
             revertTest(killed, piecesInPlay, enemyPieces);
         }
     }
-    public void printName() {
-        System.out.println(name);
-    }
     // technically only works for a few pieces but is just here for using the child version if it ever asks.
     public boolean getHasMoved() {
         return true;
@@ -185,5 +174,14 @@ public class Piece {
     // technically only works for a few pieces but is just here for using the child version if it ever asks.
     public int[] getPreviousPosition() {
         return previousPosition;
+    }
+    public void printPastAndFuturePosition() {
+        System.out.println("Piece " + whatColor() + " " + name + " initially on position " + "[" + previousPosition[0] + ", "
+                + previousPosition[1] + "] moved to position [" + getxPos() + ", " + getyPos() + "]");
+    }
+    public String whatColor() {
+        if (isPieceWhite) {
+            return "white";
+        } else return "black";
     }
 }

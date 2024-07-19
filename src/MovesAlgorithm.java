@@ -15,7 +15,6 @@ public class MovesAlgorithm {
         playerPieces = enemy;
     }
     public int chooseAIMove(ArrayList<int[]> allFutureMoves, ArrayList<Piece> allInitialPieces, Board gameBoard, int depth, boolean aiTurn) {
-        System.out.println("ai is making its move");
         ArrayList<Piece> piecesInPlay;
         ArrayList<Piece> enemyPieces;
         if (aiTurn) {
@@ -29,14 +28,17 @@ public class MovesAlgorithm {
         // on the first turn (when the ai is gonna move) this code DOES NOT RUN AT ALL
         if (depth == MAX_DEPTH) {
             for (int i = 0; i < allFutureMoves.size(); i++) {
+                // killed in this case is a black piece, and enemy pieces is black
                 Piece killed = allInitialPieces.get(i).testMove(allFutureMoves.get(i), enemyPieces);
                 allPointsValue.add(calculatePoints());
-
+                // killed in this case is a black piece, and enemy pieces is black
                 allInitialPieces.get(i).revertTest(killed, piecesInPlay, enemyPieces);
             }
             return  getLowestPointVal(allPointsValue);
         }
         for (int i = 0; i < allFutureMoves.size(); i++) {
+            // should make sense honestly
+            // killed in this case would be a white piece        and enemyPieces would be white
             Piece killed = allInitialPieces.get(i).testMove(allFutureMoves.get(i), enemyPieces);
             // now that we moved the ai (test move) we're gonna setup all the player's options
             // to mimic the board if it was now the player playing
@@ -45,9 +47,9 @@ public class MovesAlgorithm {
             setUpNextTurn(enemyPieces, piecesInPlay, gameBoard, nextAllFutureMoves, nextAllInitialPieces);
 
             allPointsValue.add(chooseAIMove(nextAllFutureMoves, nextAllInitialPieces, gameBoard, depth + 1, !aiTurn));
-            gameBoard.switchTurns();
-            gameBoard.printWhoseTurn();
+            // killed in this case is still a white piece, and enemyPieces is still white
             allInitialPieces.get(i).revertTest(killed, piecesInPlay, enemyPieces);
+            gameBoard.switchTurns();
         }
 
         int index = getHighestPointIndex(allPointsValue);
@@ -58,17 +60,15 @@ public class MovesAlgorithm {
     public void setUpNextTurn(ArrayList<Piece> enemyPieces, ArrayList<Piece> piecesInPlay, Board gameBoard, ArrayList<int[]> nextAllFutureMoves,
                                ArrayList<Piece> nextAllInitialPieces) {
         gameBoard.switchTurns();
-        gameBoard.printWhoseTurn();
-        gameBoard.clearAllFutureMoves();
         gameBoard.setAllInPlayMoves(enemyPieces, piecesInPlay, gameBoard);
 
         gameBoard.addAllMovePossibilities(nextAllFutureMoves, nextAllInitialPieces, enemyPieces);
     }
     public int getLowestPointVal(ArrayList<Integer> allPointsValue) {
         int lowestVal = Integer.MAX_VALUE;
-        for (int i = 0; i < allPointsValue.size(); i++) {
-            if (allPointsValue.get(i) < lowestVal) {
-                lowestVal = allPointsValue.get(i);
+        for (Integer integer : allPointsValue) {
+            if (integer < lowestVal) {
+                lowestVal = integer;
             }
         }
         return lowestVal;

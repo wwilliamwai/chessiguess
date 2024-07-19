@@ -3,13 +3,13 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 
 public class Queen extends Piece {
-    private Bishop invisBishop;
-    private Rook invisRook;
-    public Queen(int x, int y, boolean w, boolean whitePlayer, PApplet window) {
-        super(x,y,w, whitePlayer);
+    private final Bishop invisBishop;
+    private final Rook invisRook;
+    public Queen(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window) {
+        super(x,y,isWhite, whitePlayer);
         name = "queen";
-        invisBishop = new Bishop(x, y, w, whitePlayer, window);
-        invisRook = new Rook(x, y, w, whitePlayer, window);
+        invisBishop = new Bishop(x, y, isWhite, whitePlayer, window);
+        invisRook = new Rook(x, y, isWhite, whitePlayer, window);
         setAndLoadImage(window);
     }
     public void setAndLoadImage(PApplet window) {
@@ -20,11 +20,13 @@ public class Queen extends Piece {
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
+        previousPosition = getPosition();
         if (isMoveAnAttack(nextPos, enemyPieces)) {
             attack(nextPos,enemyPieces);
         }
         xPos = nextPos[0];
         yPos = nextPos[1];
+        printPastAndFuturePosition();
         preTestPosition = getPosition();
         updateInvisPieces();
         isMovesAlreadySet = false;

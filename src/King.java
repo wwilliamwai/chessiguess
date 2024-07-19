@@ -7,8 +7,8 @@ public class King extends Piece {
     private boolean hasBeenInCheck;
     private Piece shortCastleRook;
     private Piece longCastleRook;
-    public King(int x, int y, boolean w, boolean whitePlayer, PApplet window) {
-        super(x, y, w, whitePlayer);
+    public King(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window) {
+        super(x, y, isWhite, whitePlayer);
         name = "king";
         hasMoved = false;
         hasBeenInCheck = false;
@@ -22,6 +22,7 @@ public class King extends Piece {
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
+        previousPosition = getPosition();
         if (isMoveAnAttack(nextPos, enemyPieces)) {
             attack(nextPos, enemyPieces);
         }
@@ -38,6 +39,7 @@ public class King extends Piece {
             xPos = nextPos[0];
             yPos = nextPos[1];
         }
+        printPastAndFuturePosition();
         preTestPosition = getPosition();
         shortCastleRook = null;
         longCastleRook = null;

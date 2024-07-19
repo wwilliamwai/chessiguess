@@ -235,6 +235,7 @@ public class Board {
         }
     }
     public boolean isBoardInCheck() {
+        // somethign wrong with the code here that makes a piece delete all of its moves...
         ArrayList<Piece> piecesInPlay;
         Piece kingInPlay;
         ArrayList<Piece> enemyPieces;
@@ -290,13 +291,5 @@ public class Board {
     }
     public void switchTurns() {
         whiteTurn = !whiteTurn;
-    }
-    public void printWhoseTurn() {
-        if (whiteTurn) {
-            System.out.println("it is currently white's turn");
-        } else System.out.println("it is currently black's turn");
-    }
-    public Piece getLastMoved() {
-        return lastMoved;
     }
 }

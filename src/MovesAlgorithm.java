@@ -25,37 +25,36 @@ public class MovesAlgorithm {
             enemyPieces = aiPieces;
         }
         ArrayList<Integer> allPointsValue = new ArrayList<>();
-        // on the first turn (when the ai is gonna move) this code DOES NOT RUN AT ALL
+
         if (depth == MAX_DEPTH) {
             for (int i = 0; i < allFutureMoves.size(); i++) {
-                // killed in this case is a black piece, and enemy pieces is black
                 Piece killed = allInitialPieces.get(i).testMove(allFutureMoves.get(i), enemyPieces);
                 allPointsValue.add(calculatePoints());
-                // killed in this case is a black piece, and enemy pieces is black
                 allInitialPieces.get(i).revertTest(killed, piecesInPlay, enemyPieces);
             }
-            return  getLowestPointVal(allPointsValue);
+            if (aiTurn) {
+                return getHighestPointVal(allPointsValue);
+            } else return getLowestPointVal(allPointsValue);
         }
         for (int i = 0; i < allFutureMoves.size(); i++) {
-            // should make sense honestly
-            // killed in this case would be a white piece        and enemyPieces would be white
             Piece killed = allInitialPieces.get(i).testMove(allFutureMoves.get(i), enemyPieces);
-            // now that we moved the ai (test move) we're gonna setup all the player's options
-            // to mimic the board if it was now the player playing
             ArrayList<int[]> nextAllFutureMoves = new ArrayList<>();
             ArrayList<Piece> nextAllInitialPieces = new ArrayList<>();
             setUpNextTurn(enemyPieces, piecesInPlay, gameBoard, nextAllFutureMoves, nextAllInitialPieces);
-
-            allPointsValue.add(chooseAIMove(nextAllFutureMoves, nextAllInitialPieces, gameBoard, depth + 1, !aiTurn));
-            // killed in this case is still a white piece, and enemyPieces is still white
+            allPointsValue.add(chooseAIMove(nextAllFutureMoves, nextAllInitialPieces, gameBoard, depth +1, !aiTurn));
             allInitialPieces.get(i).revertTest(killed, piecesInPlay, enemyPieces);
             gameBoard.switchTurns();
         }
+        if (depth == 1) {
+            int index = getHighestPointIndex(allPointsValue);
+            chosenMove = allFutureMoves.get(index);
+            chosenPiece = allInitialPieces.get(index);
+            return 0;
+        }
+        else if (aiTurn) {
+            return getHighestPointVal(allPointsValue);
+        } else return getLowestPointVal(allPointsValue);
 
-        int index = getHighestPointIndex(allPointsValue);
-        chosenMove = allFutureMoves.get(index);
-        chosenPiece = allInitialPieces.get(index);
-        return getLowestPointVal(allPointsValue);
     }
     public void setUpNextTurn(ArrayList<Piece> enemyPieces, ArrayList<Piece> piecesInPlay, Board gameBoard, ArrayList<int[]> nextAllFutureMoves,
                                ArrayList<Piece> nextAllInitialPieces) {
@@ -73,6 +72,15 @@ public class MovesAlgorithm {
         }
         return lowestVal;
     }
+    public int getHighestPointVal(ArrayList<Integer> allPointsValue) {
+        int highestVal = Integer.MIN_VALUE;
+        for (Integer integer: allPointsValue) {
+            if (integer > highestVal) {
+                highestVal = integer;
+            }
+        }
+        return highestVal;
+    }
     public int getHighestPointIndex(ArrayList<Integer> lowestPointsPostMove) {
         ArrayList<Integer> bestIndexes = new ArrayList<>();
         int highestPoints = Integer.MIN_VALUE;
@@ -89,7 +97,6 @@ public class MovesAlgorithm {
         int random = (int) (Math.random() * bestIndexes.size() );
         return bestIndexes.get(random);
     }
-
     public int calculatePoints() {
         int totalPoints = 0;
         for (Piece team: aiPieces) {
@@ -101,23 +108,26 @@ public class MovesAlgorithm {
         return  totalPoints;
     }
     public int getPiecePointVal(Piece piece) {
-        int points = 0;
-        if (piece.name.equals("pawn")) {
-            points = 10;
-        } else if (piece.name.equals("knight") || piece.name.equals("bishop")) {
-            points = 30;
-        } else if (piece.name.equals("rook")) {
-            points = 50;
-        } else if (piece.name.equals("queen")) {
-            points = 90;
-            // following a chart of piece strength though i dont see how this has a use since a king would always be on the board?
-        } else if (piece.name.equals("king")) {
-            points = 900;
-        }
+        int points;
+        String name = piece.name;
+        points = getStringValue(name);
         if (isPlayerWhite == piece.isPieceWhite) {
             points *= -1;
         }
         return points;
+    }
+    public int getStringValue(String name) {
+        if (name.equals("pawn")) {
+            return 10;
+        } else if (name.equals("knight") || name.equals("bishop")) {
+            return 30;
+        } else if (name.equals("rook")) {
+            return 50;
+        } else if (name.equals("queen")) {
+            return 90;
+        } else if (name.equals("king")) {
+            return 900;
+        } else return 0;
     }
     public int[] getChosenMove() {
         return chosenMove;

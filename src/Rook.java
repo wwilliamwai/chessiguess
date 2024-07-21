@@ -4,11 +4,25 @@ import java.util.ArrayList;
 
 public class Rook extends Piece{
     private boolean hasMoved;
-    public Rook(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window) {
-        super(x, y, isWhite, whitePlayer);
+    private final ArrayList<Boolean> preTestHasMoved;
+    public Rook(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window, ArrayList<Piece> teammates, ArrayList<Piece> enemies) {
+        super(x, y, isWhite, whitePlayer, teammates, enemies);
         name = "rook";
         hasMoved = false;
+        preTestHasMoved = new ArrayList<>();
         setAndLoadImage(window);
+    }
+    public void setPositionValues() {
+        positionValues = new int[][] {
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 1, 1, 1, 1, 1, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 1, 1, 1, 1, 1, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0}
+        };
     }
     public void setAndLoadImage(PApplet window) {
         if (isPieceWhite) {
@@ -17,29 +31,38 @@ public class Rook extends Piece{
         actualImage = window.loadImage(imageLink, "png");
         actualImage.resize(100,100);
     }
-    public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
-        super.move(nextPos, piecesInPlay, enemyPieces, window);
+    public void move(int[] nextPos) {
+        super.move(nextPos);
         hasMoved = true;
     }
-    public void setFutureMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
+    public Piece testMove(int[] nextPos) {
+        preTestHasMoved.add(hasMoved);
+        hasMoved = true;
+        return super.testMove(nextPos);
+    }
+    public void revertTest(Piece killed) {
+        super.revertTest(killed);
+        hasMoved = preTestHasMoved.remove(preTestHasMoved.size() -1);
+    }
+
+    public void setFutureMoves() {
         // so the piece doesn't keep adding moves to its arrayList when the board updates
         if (isMovesAlreadySet) {
             return;
         }
         // checks all moves going up
-        createAndCheckStraight(-100, true, piecesInPlay, enemyPieces);
+        createAndCheckStraight(-100, true);
         // checks all moves going down
-        createAndCheckStraight(100, true, piecesInPlay, enemyPieces);
+        createAndCheckStraight(100, true);
         // checks all moves left
-        createAndCheckStraight(-100, false, piecesInPlay, enemyPieces);
+        createAndCheckStraight(-100, false);
         // checks all moves right
-        createAndCheckStraight(100, false, piecesInPlay, enemyPieces);
+        createAndCheckStraight(100, false);
 
         isMovesAlreadySet = true;
 
     }
-    public void createAndCheckStraight(int directionalUnits, boolean isVertical, ArrayList<Piece> piecesInPlay,
-                                           ArrayList<Piece> enemyPieces) {
+    public void createAndCheckStraight(int directionalUnits, boolean isVertical) {
         int directionalUnitMultiplier = 1;
         boolean isMoveConflicting = false;
 
@@ -49,14 +72,14 @@ public class Rook extends Piece{
                 nextMove[0] = xPos;
                 nextMove[1] = yPos + directionalUnits * directionalUnitMultiplier;
 
-                isMoveConflicting = hasMoveConflict(nextMove, piecesInPlay, enemyPieces);
+                isMoveConflicting = hasMoveConflict(nextMove);
 
                 directionalUnitMultiplier++;
             } else {
                 nextMove[0] = xPos + directionalUnits * directionalUnitMultiplier;
                 nextMove[1] = yPos;
 
-                isMoveConflicting = hasMoveConflict(nextMove, piecesInPlay, enemyPieces);
+                isMoveConflicting = hasMoveConflict(nextMove);
 
                 directionalUnitMultiplier++;
             }

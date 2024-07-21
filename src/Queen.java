@@ -5,12 +5,24 @@ import java.util.ArrayList;
 public class Queen extends Piece {
     private final Bishop invisBishop;
     private final Rook invisRook;
-    public Queen(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window) {
-        super(x,y,isWhite, whitePlayer);
+    public Queen(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window, ArrayList<Piece> teammates, ArrayList<Piece> enemies) {
+        super(x,y,isWhite, whitePlayer, teammates, enemies);
         name = "queen";
-        invisBishop = new Bishop(x, y, isWhite, whitePlayer, window);
-        invisRook = new Rook(x, y, isWhite, whitePlayer, window);
+        invisBishop = new Bishop(x, y, isWhite, whitePlayer, window, teammates, enemies);
+        invisRook = new Rook(x, y, isWhite, whitePlayer, window, teammates, enemies);
         setAndLoadImage(window);
+    }
+    public void setPositionValues() {
+        positionValues = new int[][] {
+                {-2, -1, -1, -0, -0, -1, -1, -2},
+                {-1, 0, 0, 0, 0, 0, 0, -1},
+                {-1, 0, 0, 0, 0, 0, 0, -1},
+                {-0, 0, 0, 0, 0, 0, 0, -0},
+                {-1, 0, 0, 0, 0, 0, 0, -1},
+                {-1, 0, 0, 0, 0, 0, 0, -1},
+                {-1, 0, 0, 0, 0, 0, 0, -1},
+                {-2, -1, -1, -0, -0, -1, -1, -2}
+        };
     }
     public void setAndLoadImage(PApplet window) {
         if (isPieceWhite) {
@@ -19,53 +31,48 @@ public class Queen extends Piece {
         actualImage = window.loadImage(imageLink, "png");
         actualImage.resize(100,100);
     }
-    public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces, PApplet window) {
+    public void move(int[] nextPos) {
         previousPosition = getPosition();
-        if (isMoveAnAttack(nextPos, enemyPieces)) {
-            attack(nextPos,enemyPieces);
-        }
+        attack(nextPos);
         xPos = nextPos[0];
         yPos = nextPos[1];
         printPastAndFuturePosition();
-        preTestPosition = getPosition();
         updateInvisPieces();
         isMovesAlreadySet = false;
     }
-    public Piece testMove(int[] nextPos, ArrayList<Piece> enemyPieces) {
-        Piece killed = null;
-        if (isMoveAnAttack(nextPos, enemyPieces)) {
-            killed = testAttack(nextPos, enemyPieces);
-        }
+    public Piece testMove(int[] nextPos) {
+        preTestPositions.add(getPosition());
+        Piece killed = testAttack(nextPos);
         xPos = nextPos[0];
         yPos = nextPos[1];
         testUpdateInvisPieces();
         return killed;
     }
-    public void revertTest(Piece killed, ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
-        super.revertTest(killed, piecesInPlay, enemyPieces);
+    public void revertTest(Piece killed) {
+        super.revertTest(killed);
         testUpdateInvisPieces();
     }
-    public void setFutureMoves(ArrayList<Piece> piecesInPlay, ArrayList<Piece> enemyPieces) {
+    public void setFutureMoves() {
         if (isMovesAlreadySet) {
             return;
         }
         // adds all possible top left diagonal moves
-        invisBishop.createAndCheckDiagonal(-100, -100, piecesInPlay, enemyPieces);
+        invisBishop.createAndCheckDiagonal(-100, -100);
         // adds all possible top right diagonal moves
-        invisBishop.createAndCheckDiagonal(100, -100, piecesInPlay, enemyPieces);
+        invisBishop.createAndCheckDiagonal(100, -100);
         // adds all possible bottom left diagonal moves
-        invisBishop.createAndCheckDiagonal(-100, 100, piecesInPlay, enemyPieces);
+        invisBishop.createAndCheckDiagonal(-100, 100);
         // adds all possible bottom right diagonal moves
-        invisBishop.createAndCheckDiagonal(100, 100, piecesInPlay, enemyPieces);
+        invisBishop.createAndCheckDiagonal(100, 100);
 
         // checks all moves going up
-        invisRook.createAndCheckStraight(-100, true, piecesInPlay, enemyPieces);
+        invisRook.createAndCheckStraight(-100, true);
         // checks all moves going down
-        invisRook.createAndCheckStraight(100, true, piecesInPlay, enemyPieces);
+        invisRook.createAndCheckStraight(100, true);
         // checks all moves left
-        invisRook.createAndCheckStraight(-100, false, piecesInPlay, enemyPieces);
+        invisRook.createAndCheckStraight(-100, false);
         // checks all moves right
-        invisRook.createAndCheckStraight(100, false, piecesInPlay, enemyPieces);
+        invisRook.createAndCheckStraight(100, false);
 
         sendBishopMoves();
         sendRookMoves();

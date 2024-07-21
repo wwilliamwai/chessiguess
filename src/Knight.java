@@ -3,10 +3,10 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 
 public class Knight extends Piece{
-    public Knight(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window, ArrayList<Piece> teammates, ArrayList<Piece> enemies) {
-        super(x,y,isWhite, whitePlayer, teammates, enemies);
+    public Knight(int x, int y, boolean isWhite, boolean whitePlayer, ArrayList<Piece> teammates, ArrayList<Piece> enemies, PApplet window, Board gameBoard) {
+        super(x,y,isWhite, whitePlayer, teammates, enemies, window, gameBoard);
         name = "knight";
-        setAndLoadImage(window);
+        setAndLoadImage();
     }
     public void setPositionValues() {
         positionValues = new int[][] {
@@ -20,7 +20,7 @@ public class Knight extends Piece{
                 {-5, -4, -3, -3, -3, -3, -4, -5}
         };
     }
-    public void setAndLoadImage(PApplet window) {
+    public void setAndLoadImage() {
         if (isPieceWhite) {
             imageLink = "chesspieces/whiteKnight.png";
         } else imageLink = "chesspieces/blackKnight.png";

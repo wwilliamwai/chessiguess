@@ -3,8 +3,8 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 
 public class Bishop extends Piece{
-    public Bishop(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window, ArrayList<Piece> teammates, ArrayList<Piece> enemies) {
-        super(x,y,isWhite,whitePlayer, teammates, enemies);
+    public Bishop(int x, int y, boolean isWhite, boolean whitePlayer, ArrayList<Piece> teammates, ArrayList<Piece> enemies, PApplet window, Board gameBoard) {
+        super(x,y,isWhite,whitePlayer, teammates, enemies, window, gameBoard);
         name = "bishop";
         setAndLoadImage(window);
     }

@@ -24,10 +24,10 @@ public class MovesAlgorithm {
         ArrayList<int[]> allFutureMoves = new ArrayList<>();
         ArrayList<Piece> allInitialPieces = new ArrayList<>();
         if (aiTurn) {
-            gameBoard.setAllInPlayMoves(aiPieces, gameBoard);
+            gameBoard.setAllInPlayMoves(aiPieces);
             gameBoard.addAllMovePossibilities(allFutureMoves, allInitialPieces, aiPieces);
         } else {
-            gameBoard.setAllInPlayMoves(playerPieces, gameBoard);
+            gameBoard.setAllInPlayMoves(playerPieces);
             gameBoard.addAllMovePossibilities(allFutureMoves, allInitialPieces, playerPieces);
         }
         if (aiTurn) {
@@ -37,10 +37,10 @@ public class MovesAlgorithm {
                 Piece killed = allInitialPieces.get(i).testMove(allFutureMoves.get(i));
                 gameBoard.switchTurns();
                 if (depth == 0) {
-                    System.out.println("depth 0 we got something with an eval of " + gameBoard.calculatePoints(isWhite));
+                    //System.out.println("depth 0 we got something with an eval of " + gameBoard.calculatePoints(isWhite));
                 }
                 int eval = minimax(gameBoard, depth +1, alpha, beta, false);
-                System.out.println("but we're saving the eval of " + eval);
+                //System.out.println("but we're saving the eval of " + eval);
                 if (depth == 0) {
                     allPointsValue.add(eval);
                 }
@@ -67,9 +67,9 @@ public class MovesAlgorithm {
             int minEval = Integer.MAX_VALUE;
             for (int i = 0; i < allFutureMoves.size(); i++) {
                 // testing out the move option, and then saving the point evaluation to allPointsValue
-                gameBoard.switchTurns();
                 Piece killed = allInitialPieces.get(i).testMove(allFutureMoves.get(i));
-                System.out.println("depth 1 the predicted player moves had an eval of " + gameBoard.calculatePoints(isWhite));
+                gameBoard.switchTurns();
+                //System.out.println("depth 1 the predicted player moves had an eval of " + gameBoard.calculatePoints(isWhite));
                 int eval = minimax(gameBoard, depth + 1, alpha, beta, true);
                 if (depth == 0) {
                     allPointsValue.add(eval);

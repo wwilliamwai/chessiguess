@@ -16,7 +16,7 @@ public class Board {
     private boolean tileClicked;
     private final int[] clickedTileLoc;
     private Piece selected;
-    private Piece lastMoved;
+    private final ArrayList<Piece> lastMoved;
     private final MovesAlgorithm movesAlgorithm;
     public Board(PApplet window) {
         whiteTurn = true;
@@ -27,7 +27,7 @@ public class Board {
         pickSide();
         createStartPieces(window);
         selected = null;
-        lastMoved = new Piece(10000, 10000, true, true, whitePieces, blackPieces);
+        lastMoved = new ArrayList<>();
         movesAlgorithm = new MovesAlgorithm(!isPlayerWhite, getAITeam(), getAIEnemy());
     }
     public void pickSide() {
@@ -49,11 +49,11 @@ public class Board {
         }
     }
     public void drawLastMovedTile(PApplet window) {
-        if (lastMoved.name.equals("piece")) {
+        if (lastMoved.size() == 0) {
             return;
         }
-        int[] currentPos = lastMoved.getPosition();
-        int[] previousPos = lastMoved.getPreviousPosition();
+        int[] currentPos = getLatestMovedPiece().getPosition();
+        int[] previousPos = getLatestMovedPiece().getPreviousPosition();
         window.fill(255,0,0,80);
         window.rect(currentPos[0], currentPos[1], 100, 100);
         window.rect(previousPos[0], previousPos[1], 100, 100);
@@ -80,8 +80,8 @@ public class Board {
             blackYPos = 600;
         }
         for (int i = 0; i < 8; i++) {
-            whitePieces.add(new Pawn(i * 100, whiteYPos, true, isPlayerWhite, window, whitePieces, blackPieces));
-            blackPieces.add(new Pawn(i * 100, blackYPos, false, isPlayerWhite, window, blackPieces, whitePieces));
+            whitePieces.add(new Pawn(i * 100, whiteYPos, true, isPlayerWhite, whitePieces, blackPieces, window, this));
+            blackPieces.add(new Pawn(i * 100, blackYPos, false, isPlayerWhite, blackPieces, whitePieces, window, this));
         }
     }
     private void createUniquePiecesRows(PApplet window) {
@@ -91,36 +91,33 @@ public class Board {
             whiteYPos = 0;
             blackYPos = 700;
         }
-        whitePieces.add(new Rook(0,whiteYPos, true, isPlayerWhite, window, whitePieces, blackPieces));
-        whitePieces.add(new Rook(700,whiteYPos, true, isPlayerWhite, window, whitePieces, blackPieces));
-        whitePieces.add(new Knight(100, whiteYPos, true, isPlayerWhite, window, whitePieces, blackPieces));
-        whitePieces.add(new Knight(600, whiteYPos, true, isPlayerWhite, window, whitePieces, blackPieces));
-        whitePieces.add(new Bishop(200, whiteYPos, true, isPlayerWhite, window, whitePieces, blackPieces));
-        whitePieces.add(new Bishop(500, whiteYPos, true, isPlayerWhite, window, whitePieces, blackPieces));
-        whitePieces.add(new Queen(300, whiteYPos, true, isPlayerWhite, window, whitePieces, blackPieces));
-        whiteKing = new King(400, whiteYPos, true, isPlayerWhite, window, whitePieces, blackPieces);
+        whitePieces.add(new Rook(0,whiteYPos, true, isPlayerWhite, whitePieces, blackPieces, window, this));
+        whitePieces.add(new Rook(700,whiteYPos, true, isPlayerWhite, whitePieces, blackPieces, window, this));
+        whitePieces.add(new Knight(600,whiteYPos, true, isPlayerWhite, whitePieces, blackPieces, window, this));
+        whitePieces.add(new Knight(100,whiteYPos, true, isPlayerWhite, whitePieces, blackPieces, window, this));
+        whitePieces.add(new Bishop(200,whiteYPos, true, isPlayerWhite, whitePieces, blackPieces, window, this));
+        whitePieces.add(new Bishop(500,whiteYPos, true, isPlayerWhite, whitePieces, blackPieces, window, this));
+        whitePieces.add(new Queen(300,whiteYPos, true, isPlayerWhite, whitePieces, blackPieces, window, this));
+        whiteKing = new King(400,whiteYPos, true, isPlayerWhite, whitePieces, blackPieces, window, this);
         whitePieces.add(whiteKing);
 
 
-        blackPieces.add(new Rook(0,blackYPos, false, isPlayerWhite, window, blackPieces, whitePieces));
-        blackPieces.add(new Rook(700,blackYPos, false, isPlayerWhite, window, blackPieces, whitePieces));
-        blackPieces.add(new Knight(100, blackYPos, false, isPlayerWhite, window, blackPieces, whitePieces));
-        blackPieces.add(new Knight(600, blackYPos, false, isPlayerWhite, window, blackPieces, whitePieces));
-        blackPieces.add(new Bishop(200, blackYPos, false, isPlayerWhite, window, blackPieces, whitePieces));
-        blackPieces.add(new Bishop(500, blackYPos, false, isPlayerWhite, window, blackPieces, whitePieces));
-        blackPieces.add(new Queen(300, blackYPos, false, isPlayerWhite, window, blackPieces, whitePieces));
-        blackKing = new King(400, blackYPos, false, isPlayerWhite, window, blackPieces, whitePieces);
+        blackPieces.add(new Rook(0,blackYPos, false, isPlayerWhite, blackPieces, whitePieces, window, this));
+        blackPieces.add(new Rook(700,blackYPos, false, isPlayerWhite, blackPieces, whitePieces, window, this));
+        blackPieces.add(new Knight(600,blackYPos, false, isPlayerWhite, blackPieces, whitePieces, window, this));
+        blackPieces.add(new Knight(100,blackYPos, false, isPlayerWhite, blackPieces, whitePieces, window, this));
+        blackPieces.add(new Bishop(500,blackYPos, false, isPlayerWhite, blackPieces, whitePieces, window, this));
+        blackPieces.add(new Bishop(200,blackYPos, false, isPlayerWhite, blackPieces, whitePieces, window, this));
+        blackPieces.add(new Queen(300,blackYPos, false, isPlayerWhite, blackPieces, whitePieces, window, this));
+        blackKing = new King(400,blackYPos, false, isPlayerWhite, blackPieces, whitePieces, window, this);
         blackPieces.add(blackKing);
     }
     public void updateBoard(Game window) {
         ArrayList<Piece> piecesInPlay;
-        ArrayList<Piece> enemyPieces;
         if (whiteTurn) {
             piecesInPlay = whitePieces;
-            enemyPieces = blackPieces;
         } else {
             piecesInPlay = blackPieces;
-            enemyPieces = whitePieces;
         }
         // checks if the current board is won in checkmate
         if (!hasCheckedGameOver) {
@@ -136,7 +133,7 @@ public class Board {
                     window.text("White has checkmated Black", 60, 400);
                     return;
                 }
-            } else if (isPiecesMoveEmpty()) {
+            } else if (isInPlayMovesEmpty()) {
                 window.fill(0, 0, 255);
                 window.textSize(50);
                 window.text("Stalemate", 300, 400);
@@ -150,21 +147,20 @@ public class Board {
     }
     public boolean isBoardCheckmate() {
         if (isBoardInCheck()) {
-            return isPiecesMoveEmpty();
+            return isInPlayMovesEmpty();
         }
         return false;
     }
     public boolean isGameOver() {
-        return isPiecesMoveEmpty();
+        return isInPlayMovesEmpty();
     }
     public void aiMoves(MovesAlgorithm movesAlgorithm) {
         movesAlgorithm.minimax(this, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
 
         selected = movesAlgorithm.getChosenPiece();
         selected.move(movesAlgorithm.getChosenMove());
-        lastMoved = selected;
         hasCheckedGameOver = false;
-        whiteTurn = !whiteTurn;
+        switchTurns();
         selected = null;
         clearAllFutureMoves();
     }
@@ -178,7 +174,7 @@ public class Board {
     }
     public void playerMoves(ArrayList<Piece> piecesInPlay, Game window) {
         if (movesNotSet) {
-            setAllInPlayMoves(piecesInPlay, this);
+            setAllInPlayMoves(piecesInPlay);
             movesNotSet = false;
         }
         isTileClicked(window, piecesInPlay);
@@ -188,7 +184,7 @@ public class Board {
             drawMoveOptions(window, selectedFutureMoves);
 
             if (isFutureMoveTilePressed(window, selectedFutureMoves, selected)) {
-                whiteTurn = !whiteTurn;
+                switchTurns();
                 tileClicked = false;
                 hasCheckedGameOver = false;
                 selected = null;
@@ -214,7 +210,6 @@ public class Board {
             if (xClickLoc > futureMove[0] && xClickLoc < futureMove[0] + 100 && yClickLoc > futureMove[1]  &&
                     yClickLoc < futureMove[1] + 100) {
                 selected.move(futureMove);
-                lastMoved = selected;
                 return true;
             }
         }
@@ -237,16 +232,12 @@ public class Board {
         }
     }
     public boolean isBoardInCheck() {
-        // somethign wrong with the code here that makes a piece delete all of its moves...
-        ArrayList<Piece> piecesInPlay;
         Piece kingInPlay;
         ArrayList<Piece> enemyPieces;
         if (whiteTurn) {
-            piecesInPlay = whitePieces;
             kingInPlay = whiteKing;
             enemyPieces = blackPieces;
         } else {
-            piecesInPlay = blackPieces;
             kingInPlay = blackKing;
             enemyPieces = whitePieces;
         }
@@ -256,7 +247,6 @@ public class Board {
             for (int[] futureMove: enemyFutureMoves) {
                 if (Arrays.equals(kingInPlay.getPosition(), futureMove)) {
                     clearTeamsFutureMove(enemyPieces);
-                    System.out.println("board was put in check");
                     return true;
                 }
             }
@@ -264,19 +254,16 @@ public class Board {
         clearTeamsFutureMove(enemyPieces);
         return false;
     }
-    public boolean isPiecesMoveEmpty() {
+    public boolean isInPlayMovesEmpty() {
         ArrayList<Piece> piecesInPlay;
-        ArrayList<Piece> enemyPieces;
         if (whiteTurn) {
             piecesInPlay = whitePieces;
-            enemyPieces = blackPieces;
         } else {
             piecesInPlay = blackPieces;
-            enemyPieces = whitePieces;
         }
         for (Piece teamPiece: piecesInPlay) {
             teamPiece.setFutureMoves();
-            teamPiece.filterMovesInCheck(this);
+            teamPiece.filterMovesInCheck();
             ArrayList<int[]> piecesFutureMoves = teamPiece.getFutureMoves();
             if (piecesFutureMoves.size() > 0) {
                 clearTeamsFutureMove(piecesInPlay);
@@ -285,10 +272,10 @@ public class Board {
         }
         return true;
     }
-    public void setAllInPlayMoves(ArrayList<Piece> piecesInPlay, Board gameBoard) {
+    public void setAllInPlayMoves(ArrayList<Piece> piecesInPlay) {
         for (Piece piece: piecesInPlay) {
             piece.setFutureMoves();
-            piece.filterMovesInCheck(gameBoard);
+            piece.filterMovesInCheck();
         }
     }
     public ArrayList<Piece> getAITeam() {
@@ -341,5 +328,17 @@ public class Board {
             default:
                 return 0;
         }
+    }
+    public void addLastMoved(Piece movedPiece) {
+        lastMoved.add(movedPiece);
+    }
+    public Piece removeLastMoved() {
+        return lastMoved.remove(lastMoved.size()-1);
+    }
+    public Piece getLatestMovedPiece() {
+        if (lastMoved.size() == 0) {
+            return null;
+        }
+        return lastMoved.get(lastMoved.size()-1);
     }
 }

@@ -5,12 +5,12 @@ import java.util.ArrayList;
 public class Queen extends Piece {
     private final Bishop invisBishop;
     private final Rook invisRook;
-    public Queen(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window, ArrayList<Piece> teammates, ArrayList<Piece> enemies) {
-        super(x,y,isWhite, whitePlayer, teammates, enemies);
+    public Queen(int x, int y, boolean isWhite, boolean whitePlayer, ArrayList<Piece> teammates, ArrayList<Piece> enemies, PApplet window, Board gameBoard) {
+        super(x,y,isWhite, whitePlayer, teammates, enemies, window, gameBoard);
         name = "queen";
-        invisBishop = new Bishop(x, y, isWhite, whitePlayer, window, teammates, enemies);
-        invisRook = new Rook(x, y, isWhite, whitePlayer, window, teammates, enemies);
-        setAndLoadImage(window);
+        invisBishop = new Bishop(x, y, isWhite, whitePlayer, teammates, enemies, window, gameBoard);
+        invisRook = new Rook(x, y, isWhite, whitePlayer, teammates, enemies, window, gameBoard);
+        setAndLoadImage();
     }
     public void setPositionValues() {
         positionValues = new int[][] {
@@ -24,7 +24,7 @@ public class Queen extends Piece {
                 {-2, -1, -1, -0, -0, -1, -1, -2}
         };
     }
-    public void setAndLoadImage(PApplet window) {
+    public void setAndLoadImage() {
         if (isPieceWhite) {
             imageLink = "chesspieces/whiteQueen.png";
         } else imageLink = "chesspieces/blackQueen.png";
@@ -32,20 +32,22 @@ public class Queen extends Piece {
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos) {
-        previousPosition = getPosition();
+        previousPositions.add(getPosition());
         attack(nextPos);
         xPos = nextPos[0];
         yPos = nextPos[1];
         printPastAndFuturePosition();
+        gameBoard.addLastMoved(this);
         updateInvisPieces();
         isMovesAlreadySet = false;
     }
     public Piece testMove(int[] nextPos) {
-        preTestPositions.add(getPosition());
+        previousPositions.add(getPosition());
         Piece killed = testAttack(nextPos);
         xPos = nextPos[0];
         yPos = nextPos[1];
         testUpdateInvisPieces();
+        gameBoard.addLastMoved(this);
         return killed;
     }
     public void revertTest(Piece killed) {

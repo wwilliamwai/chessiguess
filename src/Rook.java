@@ -5,12 +5,12 @@ import java.util.ArrayList;
 public class Rook extends Piece{
     private boolean hasMoved;
     private final ArrayList<Boolean> preTestHasMoved;
-    public Rook(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window, ArrayList<Piece> teammates, ArrayList<Piece> enemies) {
-        super(x, y, isWhite, whitePlayer, teammates, enemies);
+    public Rook(int x, int y, boolean isWhite, boolean whitePlayer, ArrayList<Piece> teammates, ArrayList<Piece> enemies, PApplet window, Board gameBoard) {
+        super(x, y, isWhite, whitePlayer, teammates, enemies, window, gameBoard);
         name = "rook";
         hasMoved = false;
         preTestHasMoved = new ArrayList<>();
-        setAndLoadImage(window);
+        setAndLoadImage();
     }
     public void setPositionValues() {
         positionValues = new int[][] {
@@ -24,7 +24,7 @@ public class Rook extends Piece{
                 {0, 0, 0, 0, 0, 0, 0, 0}
         };
     }
-    public void setAndLoadImage(PApplet window) {
+    public void setAndLoadImage() {
         if (isPieceWhite) {
             imageLink = "chesspieces/whiteRook.png";
         } else imageLink = "chesspieces/blackRook.png";
@@ -42,7 +42,7 @@ public class Rook extends Piece{
     }
     public void revertTest(Piece killed) {
         super.revertTest(killed);
-        hasMoved = preTestHasMoved.remove(preTestHasMoved.size() -1);
+        hasMoved = preTestHasMoved.remove(preTestHasMoved.size() - 1);
     }
 
     public void setFutureMoves() {

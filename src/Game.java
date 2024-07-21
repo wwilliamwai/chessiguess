@@ -5,18 +5,15 @@ public class Game extends PApplet {
     // TODO: declare game variables
     Board gameBoard;
     int clickX, clickY;
-
     public void settings() {
         size(800, 800);   // set the window size
 
     }
-
     public void setup() {
         // TODO: initialize game variables
         frameRate(60);
         gameBoard = new Board(this);
     }
-
     /***df
      * Draws each frame to the screen.  Runs automatically in a loop at frameRate frames a second.
      * tick each object (have it update itself), and draw each object

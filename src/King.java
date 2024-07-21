@@ -8,13 +8,13 @@ public class King extends Piece {
     private boolean hasBeenInCheck;
     private Piece shortCastleRook;
     private Piece longCastleRook;
-    public King(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window, ArrayList<Piece> teammates, ArrayList<Piece> enemies) {
-        super(x, y, isWhite, whitePlayer, teammates, enemies);
+    public King(int x, int y, boolean isWhite, boolean whitePlayer, ArrayList<Piece> teammates, ArrayList<Piece> enemies, PApplet window, Board gameBoard) {
+        super(x, y, isWhite, whitePlayer, teammates, enemies, window, gameBoard);
         name = "king";
         hasMoved = false;
         preTestHasMoved = new ArrayList<>();
         hasBeenInCheck = false;
-        setAndLoadImage(window);
+        setAndLoadImage();
     }
     public void setPositionValues() {
         positionValues = new int[][] {
@@ -28,7 +28,7 @@ public class King extends Piece {
                 {2, 3, 1, 0, 0, 1, 3, 2}
         };
     }
-    public void setAndLoadImage(PApplet window) {
+    public void setAndLoadImage() {
         if (isPieceWhite) {
             imageLink = "chesspieces/whiteKing.png";
         } else imageLink = "chesspieces/blackKing.png";
@@ -36,7 +36,7 @@ public class King extends Piece {
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos) {
-        previousPosition = getPosition();
+        previousPositions.add(getPosition());
         if (nextPos[0] == xPos + 200) {
             xPos = nextPos[0];
             yPos = nextPos[1];
@@ -52,6 +52,8 @@ public class King extends Piece {
         }
         attack(getPosition());
         printPastAndFuturePosition();
+        gameBoard.addLastMoved(this);
+
         shortCastleRook = null;
         longCastleRook = null;
         clearFutureMoves();
@@ -59,7 +61,7 @@ public class King extends Piece {
         hasMoved = true;
     }
     public Piece testMove(int[] nextPos) {
-        preTestPositions.add(getPosition());
+        previousPositions.add(getPosition());
         Piece killed = null;
         if (isMoveAnAttack(nextPos)) {
             killed = testAttack(nextPos);
@@ -82,10 +84,12 @@ public class King extends Piece {
             xPos = nextPos[0];
             yPos = nextPos[1];
         }
+        gameBoard.addLastMoved(this);
+        preTestHasMoved.add(hasMoved);
+
         shortCastleRook = null;
         longCastleRook = null;
 
-        preTestHasMoved.add(hasMoved);
         hasMoved = true;
 
         return killed;
@@ -121,14 +125,14 @@ public class King extends Piece {
         move[1] = yPos + verticalUnits;
         hasMoveConflict(move);
     }
-    public void filterMovesInCheck(Board gameBoard) {
-        super.filterMovesInCheck(gameBoard);
+    public void filterMovesInCheck() {
+        super.filterMovesInCheck();
         if (!hasMoved && !hasBeenInCheck) {
             if (doesContainRightMove()) {
-                createShortCastleMove(gameBoard);
+                createShortCastleMove();
             }
             if (doesContainLeftMove()) {
-                createLongCastleMove(gameBoard);
+                createLongCastleMove();
             }
         }
     }
@@ -150,12 +154,12 @@ public class King extends Piece {
         }
         return false;
     }
-    public void createShortCastleMove(Board gameBoard) {
+    public void createShortCastleMove() {
         // first we have to make sure circumstances are PERFECT for castling
         // we already have (has not been moved) (has not been in check) (doesn't pass through a check on the left)
         // make sure the king position after the castle is not in check. Make sure the rook hasn't moved yet either. make sure there aren't any pieces in between
         Piece rook = findShortCastleRook();
-        if (isRookGoodConditions(rook) && !isAnyPieceTwoRight() && !isShortCastleInCheck(rook, gameBoard)) {
+        if (isRookGoodConditions(rook) && !isAnyPieceTwoRight() && !isShortCastleInCheck(rook)) {
             shortCastleRook = rook;
             int[] shortCastleMove = new int[2];
             shortCastleMove[0] = getXPos() + 200;
@@ -164,9 +168,9 @@ public class King extends Piece {
         }
 
     }
-    public void createLongCastleMove(Board gameBoard) {
+    public void createLongCastleMove() {
         Piece rook = findLongCastleRook();
-        if (isRookGoodConditions(rook) && !isAnyPieceThreeLeft() && !isLongCastleInCheck(rook, gameBoard)) {
+        if (isRookGoodConditions(rook) && !isAnyPieceThreeLeft() && !isLongCastleInCheck(rook)) {
             longCastleRook = rook;
             int[] longCastleMove = new int[2];
             longCastleMove[0] = getXPos() - 200;
@@ -221,7 +225,7 @@ public class King extends Piece {
         }
         return false;
     }
-    public boolean isShortCastleInCheck(Piece rook, Board gameBoard) {
+    public boolean isShortCastleInCheck(Piece rook) {
         boolean wasInCheck;
         int[] futureKingPos = new int[2];
         int[] futureRookPos = new int[2];
@@ -240,7 +244,7 @@ public class King extends Piece {
 
         return wasInCheck;
     }
-    public boolean isLongCastleInCheck(Piece rook, Board gameBoard) {
+    public boolean isLongCastleInCheck(Piece rook) {
         boolean wasInCheck;
         int[] futureKingPos = new int[2];
         int[] futureRookPos = new int[2];
@@ -249,7 +253,7 @@ public class King extends Piece {
         futureRookPos[0] = xPos + 200;
         futureRookPos[1] = yPos;
 
-        if (isTwoLeftInCheck(gameBoard)) {
+        if (isTwoLeftInCheck()) {
             return true;
         }
 
@@ -263,7 +267,7 @@ public class King extends Piece {
 
         return wasInCheck;
     }
-    public boolean isTwoLeftInCheck(Board gameBoard) {
+    public boolean isTwoLeftInCheck() {
         boolean wasInCheck;
         int[] twoLeft = new int[2];
         twoLeft[0] = xPos - 200;

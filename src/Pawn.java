@@ -6,13 +6,13 @@ public class Pawn extends Piece {
     private Piece promoted;
     private boolean hasMoved;
     private int verticalUnits;
-    public Pawn(int x, int y, boolean isWhite, boolean whitePlayer, PApplet window, ArrayList<Piece> teammates, ArrayList<Piece> enemies) {
-        super(x, y, isWhite, whitePlayer, teammates, enemies);
+    public Pawn(int x, int y, boolean isWhite, boolean whitePlayer, ArrayList<Piece> teammates, ArrayList<Piece> enemies, PApplet window, Board gameBoard) {
+        super(x, y, isWhite, whitePlayer, teammates, enemies, window, gameBoard);
         name = "pawn";
         promoted = null;
         hasMoved = false;
         setVerticalUnits();
-        setAndLoadImage(window);
+        setAndLoadImage();
     }
     public void setPositionValues() {
         positionValues = new int[][] {
@@ -31,15 +31,15 @@ public class Pawn extends Piece {
             verticalUnits = -100;
         } else verticalUnits = 100;
     }
-    public void setAndLoadImage(PApplet window) {
+    public void setAndLoadImage() {
         if (isPieceWhite) {
             imageLink = "chesspieces/whitePawn.png";
         } else imageLink = "chesspieces/blackPawn.png";
         actualImage = window.loadImage(imageLink,"png");
         actualImage.resize(100,100);
     }
-    public void move(int[] nextPos, ArrayList<Piece> piecesInPlay, PApplet window) {
-        previousPosition = getPosition();
+    public void move(int[] nextPos) {
+        previousPositions.add(getPosition());
         // if there's a piece where you're moving to then you know its a diagonal attack
         if (isMoveAnAttack(nextPos)) {
             attack(nextPos);
@@ -54,36 +54,37 @@ public class Pawn extends Piece {
         yPos = nextPos[1];
 
         printPastAndFuturePosition();
+        gameBoard.addLastMoved(this);
+
         if (getYPos() == 0 || getYPos() == 700) {
             // if the piece is the ai
             if (isPieceWhite != isPlayerWhite) {
-                aiPromote(piecesInPlay, window);
-            } else promote(piecesInPlay, window);
+                aiPromote();
+            } else promote();
         }
         clearFutureMoves();
         hasMoved = true;
         isMovesAlreadySet = false;
     }
     public Piece testMove(int[] nextPos) {
-        preTestPositions.add(getPosition());
+        previousPositions.add(getPosition());
         Piece killed = null;
         if (isMoveAnAttack(nextPos)) {
             killed = testAttack(nextPos);
         } else if (nextPos[0] != xPos) {
-            System.out.println("it did enpassant");
             int[] enPassantKilled = new int[2];
             enPassantKilled[0] = nextPos[0];
             enPassantKilled[1] = nextPos[1] - verticalUnits;
             killed = testAttack(enPassantKilled);
-            System.out.println("during enpassant it killed" + killed);
         }
         xPos = nextPos[0];
         yPos = nextPos[1];
+        gameBoard.addLastMoved(this);
         hasMoved = true;
         return killed;
     }
     public void revertTest(Piece killed) {
-        int[] preTest = preTestPositions.remove(preTestPositions.size()-1);
+        int[] preTest = previousPositions.remove(previousPositions.size()-1);
         xPos = preTest[0];
         yPos = preTest[1];
 
@@ -98,6 +99,7 @@ public class Pawn extends Piece {
         } else if (isPieceWhite != isPlayerWhite && preTest[1] == 100) {
             hasMoved = false;
         }
+        gameBoard.removeLastMoved();
     }
     public void setFutureMoves() {
         // so the piece doesn't keep adding moves to its arrayList when the board updates
@@ -142,18 +144,18 @@ public class Pawn extends Piece {
         forwardMove[1] = yPos + verticalUnits;
         return forwardMove;
     }
-    public void filterMovesInCheck(Board gameBoard, Piece lastMoved) {
-        super.filterMovesInCheck(gameBoard);
+    public void filterMovesInCheck() {
+        super.filterMovesInCheck();
         // if the conditions are correct. (the last moved is  pawn who moved 2 squares up, and this pawn is now side to side with the other pawn( they
         // had to have moed 3 previously) then it returns true
         // then it checks if doing enpassant will put the board in check, then adds the diagonal move to its options.
-        if (isEnPassantConditionsCorrect(lastMoved)) {
+        if (isEnPassantConditionsCorrect(gameBoard.getLatestMovedPiece())) {
             int[] enPassantPos = new int[2];
 
-            enPassantPos[0] = lastMoved.xPos;
-            enPassantPos[1] = lastMoved.yPos + verticalUnits;
+            enPassantPos[0] = xPos;
+            enPassantPos[1] = gameBoard.getLatestMovedPiece().yPos + verticalUnits;
 
-            if (!isEnPassantInCheck(enPassantPos, lastMoved, gameBoard)) {
+            if (!isEnPassantInCheck(enPassantPos, gameBoard.getLatestMovedPiece() ) ) {
                 futureMoves.add(enPassantPos);
             }
         }
@@ -165,11 +167,19 @@ public class Pawn extends Piece {
     public boolean isEnPassantConditionsCorrect(Piece lastMoved) {
         // asks if the lastMoved piece is  pawn, if their last moved position is 200 y units away from their current one
         // if their y pos is the same as the current pawn rn, and if the x pos is 100 untis to the side of the ucrrent pawn
-        return lastMoved.name.equals("pawn") && lastMoved.isPieceWhite != this.isPieceWhite && (lastMoved.getPreviousPosition()[1] == lastMoved.getYPos() - 200
-                || lastMoved.getPreviousPosition()[1] == lastMoved.getYPos() + 200) && lastMoved.getYPos() == yPos &&
-                (lastMoved.getXPos() == xPos + 100 || lastMoved.getXPos() == xPos - 100);
+        return isLastMovedAPawn(lastMoved) && isLastMoveTwoForward(lastMoved) && lastMoved.getYPos() == yPos &&
+                isLastMovedSideways(lastMoved);
     }
-    public boolean isEnPassantInCheck(int[] enPassantPos, Piece lastMoved, Board gameBoard) {
+    public boolean isLastMovedAPawn(Piece lastMoved) {
+        return lastMoved != null && lastMoved.name.equals("pawn");
+    }
+    public boolean isLastMoveTwoForward(Piece pawn) {
+        return pawn.getPreviousPosition()[1] - 200 == pawn.getYPos() || pawn.getPreviousPosition()[1] + 200 == pawn.getYPos();
+    }
+    public boolean isLastMovedSideways(Piece pawn) {
+        return pawn.xPos + 100 == xPos || pawn.xPos - 100 == xPos;
+    }
+    public boolean isEnPassantInCheck(int[] enPassantPos, Piece lastMoved) {
         boolean wasInCheck;
         int[] initialPos = getPosition();
 
@@ -183,30 +193,30 @@ public class Pawn extends Piece {
 
         return wasInCheck;
     }
-    public void promote(ArrayList<Piece> piecesInPlay, PApplet window) {
-        piecesInPlay.remove(this);
+    public void promote() {
+        teammates.remove(this);
         String[] options = { "Queen", "Rook", "Bishop", "Knight" };
         int selection = JOptionPane.showOptionDialog(null, "Select what to promote to", "Select one:", 0, 3, null, options, options[0]);
         if (selection == 0) {
-            piecesInPlay.add(new Queen(xPos, yPos, isPieceWhite, isPlayerWhite,window, teammates, enemies));
+            teammates.add(new Queen(xPos, yPos, isPieceWhite, isPlayerWhite, teammates, enemies, window, gameBoard));
         }
         if (selection == 1) {
-            piecesInPlay.add(new Rook(xPos, yPos, isPieceWhite, isPlayerWhite,window, teammates, enemies));
+            teammates.add(new Rook(xPos, yPos, isPieceWhite, isPlayerWhite, teammates, enemies, window, gameBoard));
         }
         if (selection == 2) {
-            piecesInPlay.add(new Bishop(xPos, yPos, isPieceWhite, isPlayerWhite,window, teammates, enemies));
+            teammates.add(new Bishop(xPos, yPos, isPieceWhite, isPlayerWhite, teammates, enemies, window, gameBoard));
         }
         if (selection == 3) {
-            piecesInPlay.add(new Knight(xPos, yPos, isPieceWhite, isPlayerWhite,window, teammates, enemies));
+            teammates.add(new Knight(xPos, yPos, isPieceWhite, isPlayerWhite, teammates, enemies, window, gameBoard));
         }
         // spawn in a new piece kill off the original pawn, and that's allyou need to do. nothing more. nothing less. and im sure it will wori. and then just
         // make it so you run this method whenenver a pawn makes it to the last square in the column. doesn't matter if its white or black. if its a pawn and it
         // makes it to the last square it will promote.
     }
-    public void aiPromote(ArrayList<Piece> piecesInPlay, PApplet window) {
+    public void aiPromote() {
         System.out.println("did an ai promotion");
-        piecesInPlay.remove(this);
+        teammates.remove(this);
         // it just auto promotes to a queen but don't think the ai takes promotions into account when they make a move...
-        piecesInPlay.add(new Queen(xPos, yPos, isPieceWhite, isPlayerWhite, window, teammates, enemies));
+        teammates.add(new Queen(xPos, yPos, isPieceWhite, isPlayerWhite, teammates, enemies, window, gameBoard));
     }
 }

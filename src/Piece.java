@@ -9,7 +9,8 @@ public class Piece {
     protected int[][] positionValues;
     protected int xPos;
     protected int yPos;
-    protected ArrayList<int[]> previousPositions;
+    protected int[] previousPosition;
+    protected ArrayList<int[]> preTestPositions;
     protected boolean isPieceWhite;
     protected boolean isPlayerWhite;
     protected ArrayList<int[]> futureMoves;
@@ -26,7 +27,8 @@ public class Piece {
         setPositionValues();
         xPos = x;
         yPos = y;
-        previousPositions = new ArrayList<>();
+        previousPosition = new int[2];
+        preTestPositions = new ArrayList<>();
         isPieceWhite = isWhite;
         isPlayerWhite = whitePlayer;
         futureMoves = new ArrayList<>();
@@ -41,11 +43,11 @@ public class Piece {
     public void setPositionValues() {
     }
     public void setAndLoadImage() {}
-    public void draw(PApplet window) {
+    public void draw() {
         window.image(actualImage, xPos, yPos);
     }
     public void move(int[] nextPos) {
-        previousPositions.add(getPosition());
+        previousPosition = getPosition();
         attack(nextPos);
         xPos = nextPos[0];
         yPos = nextPos[1];
@@ -64,7 +66,7 @@ public class Piece {
         }
     }
     public Piece testMove(int[] nextPos) {
-        previousPositions.add(getPosition());
+        preTestPositions.add(getPosition());
         Piece killed = testAttack(nextPos);
         xPos = nextPos[0];
         yPos = nextPos[1];
@@ -83,7 +85,7 @@ public class Piece {
         return killed;
     }
     public void revertTest(Piece killed) {
-        int[] preTest = previousPositions.remove(previousPositions.size()-1);
+        int[] preTest = preTestPositions.remove(preTestPositions.size()-1);
         gameBoard.removeLastMoved();
         xPos = preTest[0];
         yPos = preTest[1];
@@ -171,11 +173,12 @@ public class Piece {
     }
     // technically only works for a few pieces but is just here for using the child version if it ever asks.
     public int[] getPreviousPosition() {
-        return previousPositions.get(previousPositions.size()-1);
+        return previousPosition;
+       // return preTestPositions.get(preTestPositions.size()-1);
     }
     public void printPastAndFuturePosition() {
-        System.out.println("Piece " + whatColor() + " " + name + " initially on position " + "[" + getPreviousPosition()[0] + ", "
-                + getPreviousPosition()[1] + "] moved to position [" + getXPos() + ", " + getYPos() + "]");
+         System.out.println("Piece " + whatColor() + " " + name + " initially on position " + "[" + previousPosition[0] + ", "
+                + previousPosition[1] + "] moved to position [" + getXPos() + ", " + getYPos() + "]");
     }public int getPositionValue() {
         try {
             return positionValues[xPos / 100][yPos / 100];

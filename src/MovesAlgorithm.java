@@ -41,6 +41,9 @@ public class MovesAlgorithm {
                 }
                 int eval = minimax(gameBoard, depth +1, alpha, beta, false);
                 //System.out.println("but we're saving the eval of " + eval);
+                if (depth == 2) {
+                    System.out.println("at depth 2 we got an eval of " + eval);
+                }
                 if (depth == 0) {
                     allPointsValue.add(eval);
                 }
@@ -71,8 +74,8 @@ public class MovesAlgorithm {
                 gameBoard.switchTurns();
                 //System.out.println("depth 1 the predicted player moves had an eval of " + gameBoard.calculatePoints(isWhite));
                 int eval = minimax(gameBoard, depth + 1, alpha, beta, true);
-                if (depth == 0) {
-                    allPointsValue.add(eval);
+                if (depth == 1) {
+                    System.out.println("at depth 1 we had an eval of" + eval);
                 }
                 // undo the move that just happened
                 allInitialPieces.get(i).revertTest(killed);

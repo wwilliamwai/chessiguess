@@ -40,23 +40,33 @@ public class Board {
             isPlayerWhite = false;
         }
     }
-    public void drawPieces(PApplet window) {
+    public void drawPieces() {
         for (Piece piece: blackPieces) {
-            piece.draw(window);
+            piece.draw();
         }
         for (Piece piece: whitePieces) {
-            piece.draw(window);
+            piece.draw();
         }
     }
-    public void drawLastMovedTile(PApplet window) {
+    public int[][] drawLastMovedTile(PApplet window) {
         if (lastMoved.size() == 0) {
-            return;
+            return null;
         }
-        int[] currentPos = getLatestMovedPiece().getPosition();
+        int[][] lastMovedTiles = new int[2][2];
+
         int[] previousPos = getLatestMovedPiece().getPreviousPosition();
+        int[] currentPos = getLatestMovedPiece().getPosition();
+
+        lastMovedTiles[0][0] = previousPos[0];
+        lastMovedTiles[0][1] = previousPos[1];
+        lastMovedTiles[1][0] = currentPos[0];
+        lastMovedTiles[1][1] = currentPos[1];
+
         window.fill(255,0,0,80);
-        window.rect(currentPos[0], currentPos[1], 100, 100);
         window.rect(previousPos[0], previousPos[1], 100, 100);
+        window.rect(currentPos[0], currentPos[1], 100, 100);
+
+        return lastMovedTiles;
     }
     public void drawClickedTile(PApplet window) {
         window.fill(0, 0, 0, 60);
@@ -246,6 +256,7 @@ public class Board {
             ArrayList<int[]> enemyFutureMoves = enemy.getFutureMoves();
             for (int[] futureMove: enemyFutureMoves) {
                 if (Arrays.equals(kingInPlay.getPosition(), futureMove)) {
+                    kingInPlay.setHasBeenInCheck(true);
                     clearTeamsFutureMove(enemyPieces);
                     return true;
                 }

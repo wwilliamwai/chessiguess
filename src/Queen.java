@@ -26,13 +26,13 @@ public class Queen extends Piece {
     }
     public void setAndLoadImage() {
         if (isPieceWhite) {
-            imageLink = "chesspieces/whiteQueen.png";
-        } else imageLink = "chesspieces/blackQueen.png";
+            imageLink = "images/Chess_qlt45.svg.png";
+        } else imageLink = "images/Chess_qdt45.svg.png";
         actualImage = window.loadImage(imageLink, "png");
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos) {
-        previousPositions.add(getPosition());
+        preTestPositions.add(getPosition());
         attack(nextPos);
         xPos = nextPos[0];
         yPos = nextPos[1];
@@ -42,7 +42,7 @@ public class Queen extends Piece {
         isMovesAlreadySet = false;
     }
     public Piece testMove(int[] nextPos) {
-        previousPositions.add(getPosition());
+        preTestPositions.add(getPosition());
         Piece killed = testAttack(nextPos);
         xPos = nextPos[0];
         yPos = nextPos[1];

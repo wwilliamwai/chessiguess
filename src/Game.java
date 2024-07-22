@@ -5,6 +5,7 @@ public class Game extends PApplet {
     // TODO: declare game variables
     Board gameBoard;
     int clickX, clickY;
+    int[][] lastMovedTiles;
     public void settings() {
         size(800, 800);   // set the window size
 
@@ -13,6 +14,7 @@ public class Game extends PApplet {
         // TODO: initialize game variables
         frameRate(60);
         gameBoard = new Board(this);
+        lastMovedTiles = new int[2][2];
     }
     /***df
      * Draws each frame to the screen.  Runs automatically in a loop at frameRate frames a second.
@@ -22,8 +24,8 @@ public class Game extends PApplet {
         background(255);    // paint screen white
         fill(0,255,0);          // load green paint color
         drawBoard();
-        gameBoard.drawLastMovedTile(this);
-        gameBoard.drawPieces(this);
+        lastMovedTiles = gameBoard.drawLastMovedTile(this);
+        gameBoard.drawPieces();
         drawLetters();
         drawNumbers();
         gameBoard.updateBoard(this);
@@ -34,7 +36,10 @@ public class Game extends PApplet {
                 if (x % 2 == 0) {
                     fill(34,139,34);
                 } else fill(245,245,245);
-                rect(x * 100, y * 100, 100, 100);
+
+                if (!isRectAlreadyFilled(x, y)) {
+                    rect(x * 100, y * 100, 100, 100);
+                }
             }
         }
         for(int x = 0; x < 8; x++) {
@@ -42,9 +47,23 @@ public class Game extends PApplet {
                 if (x % 2 == 0) {
                     fill(245,245,245);
                 } else fill(34,139,34);
-                rect(x * 100, y * 100, 100, 100);
+
+                if (!isRectAlreadyFilled(x, y)) {
+                    rect(x * 100, y * 100, 100, 100);
+                }
             }
         }
+    }
+    public boolean isRectAlreadyFilled(int x, int y) {
+        if (lastMovedTiles == null) {
+            return false;
+        }
+        for (int[] pos: lastMovedTiles) {
+            if (pos[0] == x * 100 && pos[1] == y * 100) {
+                return true;
+            }
+        }
+        return false;
     }
     public void drawLetters() {
         String letters = "abcdefgh";

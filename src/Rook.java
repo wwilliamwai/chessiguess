@@ -26,8 +26,8 @@ public class Rook extends Piece{
     }
     public void setAndLoadImage() {
         if (isPieceWhite) {
-            imageLink = "chesspieces/whiteRook.png";
-        } else imageLink = "chesspieces/blackRook.png";
+            imageLink = "images/Chess_rlt45.svg.png";
+        } else imageLink = "images/Chess_rdt45.svg.png";
         actualImage = window.loadImage(imageLink, "png");
         actualImage.resize(100,100);
     }

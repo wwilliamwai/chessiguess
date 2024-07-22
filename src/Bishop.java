@@ -6,7 +6,7 @@ public class Bishop extends Piece{
     public Bishop(int x, int y, boolean isWhite, boolean whitePlayer, ArrayList<Piece> teammates, ArrayList<Piece> enemies, PApplet window, Board gameBoard) {
         super(x,y,isWhite,whitePlayer, teammates, enemies, window, gameBoard);
         name = "bishop";
-        setAndLoadImage(window);
+        setAndLoadImage();
     }
     public void setPositionValues() {
         positionValues = new int[][] {
@@ -20,10 +20,10 @@ public class Bishop extends Piece{
                 {-2, -1, -1, -1, -1, -1, -1, -2}
         };
     }
-    public void setAndLoadImage(PApplet window) {
+    public void setAndLoadImage() {
         if (isPieceWhite) {
-            imageLink = "chesspieces/whiteBishop.png";
-        } else imageLink = "chesspieces/blackBishop.png";
+            imageLink = "images/Chess_blt45.svg.png";
+        } else imageLink = "images/Chess_bdt45.svg.png";
         actualImage = window.loadImage(imageLink, "png");
         actualImage.resize(100,100);
     }

@@ -22,8 +22,8 @@ public class Knight extends Piece{
     }
     public void setAndLoadImage() {
         if (isPieceWhite) {
-            imageLink = "chesspieces/whiteKnight.png";
-        } else imageLink = "chesspieces/blackKnight.png";
+            imageLink = "images/Chess_nlt45.svg.png";
+        } else imageLink = "images/Chess_ndt45.svg.png";
         actualImage = window.loadImage(imageLink, "png");
         actualImage.resize(100,100);
     }

@@ -6,10 +6,12 @@ public class Pawn extends Piece {
     private Piece promoted;
     private boolean hasMoved;
     private int verticalUnits;
+    private ArrayList<Boolean> preTestHasMoved;
     public Pawn(int x, int y, boolean isWhite, boolean whitePlayer, ArrayList<Piece> teammates, ArrayList<Piece> enemies, PApplet window, Board gameBoard) {
         super(x, y, isWhite, whitePlayer, teammates, enemies, window, gameBoard);
         name = "pawn";
         promoted = null;
+        preTestHasMoved = new ArrayList<>();
         hasMoved = false;
         setVerticalUnits();
         setAndLoadImage();
@@ -33,26 +35,24 @@ public class Pawn extends Piece {
     }
     public void setAndLoadImage() {
         if (isPieceWhite) {
-            imageLink = "chesspieces/whitePawn.png";
-        } else imageLink = "chesspieces/blackPawn.png";
+            imageLink = "images/Chess_plt45.svg.png";
+        } else imageLink = "images/Chess_pdt45.svg.png";
         actualImage = window.loadImage(imageLink,"png");
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos) {
-        previousPositions.add(getPosition());
         // if there's a piece where you're moving to then you know its a diagonal attack
+        previousPosition = getPosition();
         if (isMoveAnAttack(nextPos)) {
             attack(nextPos);
-        } else if (nextPos[0] != getXPos()) {
-            // otherwise it's just an enpassant scenario if you're moving diagonally and thhere's no piece there
+        } else if (nextPos[0] != xPos) {
             int[] enPassantKilled = new int[2];
-            enPassantKilled[0] = getXPos();
-            enPassantKilled[1] = getYPos() - verticalUnits;
+            enPassantKilled[0] = nextPos[0];
+            enPassantKilled[1] = nextPos[1] - verticalUnits;
             attack(enPassantKilled);
         }
         xPos = nextPos[0];
         yPos = nextPos[1];
-
         printPastAndFuturePosition();
         gameBoard.addLastMoved(this);
 
@@ -67,7 +67,8 @@ public class Pawn extends Piece {
         isMovesAlreadySet = false;
     }
     public Piece testMove(int[] nextPos) {
-        previousPositions.add(getPosition());
+        preTestHasMoved.add(hasMoved);
+        preTestPositions.add(getPosition());
         Piece killed = null;
         if (isMoveAnAttack(nextPos)) {
             killed = testAttack(nextPos);
@@ -84,21 +85,16 @@ public class Pawn extends Piece {
         return killed;
     }
     public void revertTest(Piece killed) {
-        int[] preTest = previousPositions.remove(previousPositions.size()-1);
+        int[] preTest = preTestPositions.remove(preTestPositions.size()-1);
         xPos = preTest[0];
         yPos = preTest[1];
-
         if (killed != null) {
             enemies.add(killed);
         }
         if (promoted != null) {
             teammates.remove(promoted);
         }
-        if (isPieceWhite == isPlayerWhite && preTest[1] == 600) {
-            hasMoved = false;
-        } else if (isPieceWhite != isPlayerWhite && preTest[1] == 100) {
-            hasMoved = false;
-        }
+        hasMoved = preTestHasMoved.remove(preTestHasMoved.size()-1);
         gameBoard.removeLastMoved();
     }
     public void setFutureMoves() {
@@ -152,10 +148,10 @@ public class Pawn extends Piece {
         if (isEnPassantConditionsCorrect(gameBoard.getLatestMovedPiece())) {
             int[] enPassantPos = new int[2];
 
-            enPassantPos[0] = xPos;
+            enPassantPos[0] = gameBoard.getLatestMovedPiece().xPos;
             enPassantPos[1] = gameBoard.getLatestMovedPiece().yPos + verticalUnits;
 
-            if (!isEnPassantInCheck(enPassantPos, gameBoard.getLatestMovedPiece() ) ) {
+            if (!isEnPassantInCheck(enPassantPos ) ) {
                 futureMoves.add(enPassantPos);
             }
         }
@@ -179,17 +175,13 @@ public class Pawn extends Piece {
     public boolean isLastMovedSideways(Piece pawn) {
         return pawn.xPos + 100 == xPos || pawn.xPos - 100 == xPos;
     }
-    public boolean isEnPassantInCheck(int[] enPassantPos, Piece lastMoved) {
+    public boolean isEnPassantInCheck(int[] enPassantPos) {
         boolean wasInCheck;
-        int[] initialPos = getPosition();
 
-        testMove(enPassantPos);
-        enemies.remove(lastMoved);
+        Piece killed = testMove(enPassantPos);
 
         wasInCheck = gameBoard.isBoardInCheck();
-
-        testMove(initialPos);
-        enemies.add(lastMoved);
+        revertTest(killed);
 
         return wasInCheck;
     }

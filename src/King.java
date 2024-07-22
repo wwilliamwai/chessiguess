@@ -30,13 +30,12 @@ public class King extends Piece {
     }
     public void setAndLoadImage() {
         if (isPieceWhite) {
-            imageLink = "chesspieces/whiteKing.png";
-        } else imageLink = "chesspieces/blackKing.png";
+            imageLink = "images/Chess_klt45.svg.png";
+        } else imageLink = "images/Chess_kdt45.svg.png";
         actualImage = window.loadImage(imageLink,"png");
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos) {
-        previousPositions.add(getPosition());
         if (nextPos[0] == xPos + 200) {
             xPos = nextPos[0];
             yPos = nextPos[1];
@@ -61,7 +60,7 @@ public class King extends Piece {
         hasMoved = true;
     }
     public Piece testMove(int[] nextPos) {
-        previousPositions.add(getPosition());
+        preTestPositions.add(getPosition());
         Piece killed = null;
         if (isMoveAnAttack(nextPos)) {
             killed = testAttack(nextPos);

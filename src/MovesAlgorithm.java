@@ -11,7 +11,7 @@ public class MovesAlgorithm {
 
     public MovesAlgorithm(boolean white, ArrayList<Piece> team, ArrayList<Piece> enemy) {
         allPointsValue = new ArrayList<>();
-        MAX_DEPTH = 3;
+        MAX_DEPTH = 4;
         isWhite = white;
         aiPieces = team;
         playerPieces = enemy;

@@ -36,6 +36,7 @@ public class King extends Piece {
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos) {
+        previousPositions.add(getPosition());
         if (nextPos[0] == xPos + 200) {
             xPos = nextPos[0];
             yPos = nextPos[1];
@@ -60,7 +61,7 @@ public class King extends Piece {
         hasMoved = true;
     }
     public Piece testMove(int[] nextPos) {
-        preTestPositions.add(getPosition());
+        previousPositions.add(getPosition());
         Piece killed = null;
         if (isMoveAnAttack(nextPos)) {
             killed = testAttack(nextPos);

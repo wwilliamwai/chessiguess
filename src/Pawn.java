@@ -42,7 +42,7 @@ public class Pawn extends Piece {
     }
     public void move(int[] nextPos) {
         // if there's a piece where you're moving to then you know its a diagonal attack
-        previousPosition = getPosition();
+        previousPositions.add(getPosition());
         if (isMoveAnAttack(nextPos)) {
             attack(nextPos);
         } else if (nextPos[0] != xPos) {
@@ -68,7 +68,7 @@ public class Pawn extends Piece {
     }
     public Piece testMove(int[] nextPos) {
         preTestHasMoved.add(hasMoved);
-        preTestPositions.add(getPosition());
+        previousPositions.add(getPosition());
         Piece killed = null;
         if (isMoveAnAttack(nextPos)) {
             killed = testAttack(nextPos);
@@ -85,7 +85,7 @@ public class Pawn extends Piece {
         return killed;
     }
     public void revertTest(Piece killed) {
-        int[] preTest = preTestPositions.remove(preTestPositions.size()-1);
+        int[] preTest = previousPositions.remove(previousPositions.size()-1);
         xPos = preTest[0];
         yPos = preTest[1];
         if (killed != null) {

@@ -32,7 +32,7 @@ public class Queen extends Piece {
         actualImage.resize(100,100);
     }
     public void move(int[] nextPos) {
-        preTestPositions.add(getPosition());
+        previousPositions.add(getPosition());
         attack(nextPos);
         xPos = nextPos[0];
         yPos = nextPos[1];
@@ -42,7 +42,7 @@ public class Queen extends Piece {
         isMovesAlreadySet = false;
     }
     public Piece testMove(int[] nextPos) {
-        preTestPositions.add(getPosition());
+        previousPositions.add(getPosition());
         Piece killed = testAttack(nextPos);
         xPos = nextPos[0];
         yPos = nextPos[1];

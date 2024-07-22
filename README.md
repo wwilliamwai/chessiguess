@@ -6,9 +6,24 @@ Also attempted to create an AI Chess bot that uses the minimax algorithm to proc
 By examining the current state of a board during a test, adding up the total points of the currentTeam's pieces versus it's enemy, it's able to calculate an evaluation for the quality of a move.
 -> the position of a piece is also related to the amount of points it is worth, as pieces are more powerful in the center of the board, making those moves more preferred.
 
-However it looks now, I unfortunately could not see the project through completely. 
+**However it looks now, I unfortunately could not see the project through completely. **
 It was taking too much time. There was just too many complications with making an entire chess system from scratch. Regardless of how well it worked with a two player system, once I introduced an AI bot it overcomplicated everything. I had to work towards saving gamestate variables, learning a new algorithm, and etc.
 It was difficult to build upon my current system when it wasn't built for use in a minimax tree, which resulted in too many bugs and use of time to fix them.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Things to touch up/improve :
 King castling does not work as intended, as it's difficult to track whether the king has been in check in one section of its "future-moves tree" and revert that variable back to its prior state.

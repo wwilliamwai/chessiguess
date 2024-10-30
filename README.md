@@ -2,13 +2,13 @@
 Attempted to recreate an entire chess game from scratch using PApplet processing on java. 
 All classes made from scratch, except for the Game class using the basic PApplet template
 
-Also attempted to create an AI Chess bot that uses the minimax algorithm to process its optimal next move versus the player, along with alpha-beta pruning to prune wasteful/unnecessary trees to explore.
-By examining the current state of a board during a test, adding up the total points of the currentTeam's pieces versus it's enemy, it's able to calculate an evaluation for the quality of a move.
--> the position of a piece is also related to the amount of points it is worth, as pieces are more powerful in the center of the board, making those moves more preferred.
+attempted to create AI Chess bot w/ minimax algorithm for optimal moves, alpha-beta pruning to prune wasteful/unnecessary trees
+Examining current board state, adding up points of currentTeam's pieces versus it's enemy,  able to calculate evaluation for quality of a move.
+-> the position of piece related to amount of pointsworth, more powerful in the center
 
-**However it looks now, I unfortunately could not see the project through completely. **
-It was taking too much time. There was too many complications with making an entire chess system from scratch. Regardless of how well it worked with a two player system, once I introduced an AI bot it overcomplicated the system. I had to work towards saving gamestate variables, learning a new algorithm, and etc.
-It was difficult to build upon my current system when it wasn't built for use in a minimax tree, which resulted in too many bugs and use of time to fix them.
+However it looks now, I unfortunately could not see the project through completely. 
+Took too much time. Many complications with making an entire chess system from scratch. Once I introduced an AI bot it overcomplicated the system. Had to work towards saving gamestate variables, learning a new algorithm, etc.
+Difficult to build upon current system when wasn't built for use in a minimax tree
 
 
 
